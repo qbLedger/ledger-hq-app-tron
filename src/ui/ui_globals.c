@@ -25,13 +25,13 @@ bolos_ux_params_t G_ux_params;
 ux_state_t G_ux;
 
 volatile uint8_t customContractField;
-char fromAddress[BASE58CHECK_ADDRESS_SIZE+1+5]; // 5 extra bytes used to inform MultSign ID
+char fromAddress[BASE58CHECK_ADDRESS_SIZE + 1 + 5];  // 5 extra bytes used to inform MultSign ID
 char toAddress[BASE58CHECK_ADDRESS_SIZE + 1];
 char addressSummary[40];
 char fullContract[MAX_TOKEN_LENGTH];
 char TRC20Action[9];
 char TRC20ActionSendAllow[8];
-char fullHash[HASH_SIZE*2+1];
+char fullHash[HASH_SIZE * 2 + 1];
 int8_t votes_count;
 transactionContext_t transactionContext;
 publicKeyContext_t publicKeyContext;
@@ -48,7 +48,7 @@ unsigned int ui_callback_address_ok(void) {
 #ifndef HAVE_NBGL
     ui_idle();
 #endif
-    return 0; // do not redraw the widget
+    return 0;  // do not redraw the widget
 }
 
 unsigned int ui_callback_signMessage_ok(void) {
@@ -57,7 +57,7 @@ unsigned int ui_callback_signMessage_ok(void) {
     signTransaction(&transactionContext);
     // send to output buffer
     memcpy(G_io_apdu_buffer, transactionContext.signature, transactionContext.signatureLength);
-    tx=transactionContext.signatureLength;
+    tx = transactionContext.signatureLength;
     // E_OK
     G_io_apdu_buffer[tx++] = 0x90;
     G_io_apdu_buffer[tx++] = 0x00;
@@ -68,7 +68,7 @@ unsigned int ui_callback_signMessage_ok(void) {
 #ifndef HAVE_NBGL
     ui_idle();
 #endif
-    return 0; // do not redraw the widget
+    return 0;  // do not redraw the widget
 }
 
 unsigned int ui_callback_tx_cancel(void) {
@@ -81,7 +81,7 @@ unsigned int ui_callback_tx_cancel(void) {
 #ifndef HAVE_NBGL
     ui_idle();
 #endif
-    return 0; // do not redraw the widget
+    return 0;  // do not redraw the widget
 }
 
 unsigned int ui_callback_tx_ok(void) {
@@ -90,7 +90,7 @@ unsigned int ui_callback_tx_ok(void) {
     signTransaction(&transactionContext);
     // send to output buffer
     memcpy(G_io_apdu_buffer, transactionContext.signature, transactionContext.signatureLength);
-    tx=transactionContext.signatureLength;
+    tx = transactionContext.signatureLength;
     // E_OK
     G_io_apdu_buffer[tx++] = 0x90;
     G_io_apdu_buffer[tx++] = 0x00;
@@ -101,7 +101,7 @@ unsigned int ui_callback_tx_ok(void) {
 #ifndef HAVE_NBGL
     ui_idle();
 #endif
-    return 0; // do not redraw the widget
+    return 0;  // do not redraw the widget
 }
 
 unsigned int ui_callback_ecdh_ok(void) {
@@ -110,13 +110,19 @@ unsigned int ui_callback_ecdh_ok(void) {
     uint32_t tx = 0;
 
     // Get private key
-    os_perso_derive_node_bip32(CX_CURVE_256K1, transactionContext.bip32_path.indices,
-            transactionContext.bip32_path.length, privateKeyData, NULL);
+    os_perso_derive_node_bip32(CX_CURVE_256K1,
+                               transactionContext.bip32_path.indices,
+                               transactionContext.bip32_path.length,
+                               privateKeyData,
+                               NULL);
     cx_ecfp_init_private_key(CX_CURVE_256K1, privateKeyData, 32, &privateKey);
 
-    tx = cx_ecdh(&privateKey, CX_ECDH_POINT,
-                    transactionContext.signature, 65,
-                    G_io_apdu_buffer, 160);
+    tx = cx_ecdh(&privateKey,
+                 CX_ECDH_POINT,
+                 transactionContext.signature,
+                 65,
+                 G_io_apdu_buffer,
+                 160);
 
     // Clear tmp buffer data
     explicit_bzero(&privateKey, sizeof(privateKey));
@@ -132,5 +138,5 @@ unsigned int ui_callback_ecdh_ok(void) {
 #ifndef HAVE_NBGL
     ui_idle();
 #endif
-    return 0; // do not redraw the widget
+    return 0;  // do not redraw the widget
 }
