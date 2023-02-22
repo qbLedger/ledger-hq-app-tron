@@ -320,6 +320,72 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
             txInfos.flowTitle = "Verify Address";
             infoLongPress.text = "Confirm Approve";
             break;
+        case APPROVAL_FREEZEASSETV2_TRANSACTION:
+            txInfos.confirmCb = (nbgl_callback_t) ui_callback_address_ok;
+            txInfos.fields[0].item = "Gain";
+            txInfos.fields[0].value = fullContract;
+            txInfos.fields[1].item = "Amount";
+            txInfos.fields[1].value = G_io_apdu_buffer;
+            txInfos.fields[2].item = "To";
+            txInfos.fields[2].value = toAddress;
+            txInfos.fields[3].item = "From";
+            txInfos.fields[3].value = fromAddress;
+            pairList.nbPairs = 4;
+            txInfos.flowTitle = "Review FreezeV2";
+            infoLongPress.text = "Confirm FreezeV2";
+            break;
+        case APPROVAL_UNFREEZEASSETV2_TRANSACTION:
+            txInfos.confirmCb = (nbgl_callback_t) ui_callback_address_ok;
+            txInfos.fields[0].item = "Resource";
+            txInfos.fields[0].value = fullContract;
+            txInfos.fields[1].item = "Amount";
+            txInfos.fields[1].value = G_io_apdu_buffer;
+            txInfos.fields[2].item = "To";
+            txInfos.fields[2].value = toAddress;
+            txInfos.fields[3].item = "From";
+            txInfos.fields[3].value = fromAddress;
+            pairList.nbPairs = 4;
+            txInfos.flowTitle = "Review UnfreezeV2";
+            infoLongPress.text = "Confirm UnfreezeV2";
+            break;
+        case APPROVAL_DELEGATE_RESOURCE_TRANSACTION:
+            txInfos.confirmCb = (nbgl_callback_t) ui_callback_address_ok;
+            txInfos.fields[0].item = "Resource";
+            txInfos.fields[0].value = fullContract;
+            txInfos.fields[1].item = "Amount";
+            txInfos.fields[1].value = G_io_apdu_buffer;
+            txInfos.fields[2].item = "Lock";
+            txInfos.fields[2].value = (char*)G_io_apdu_buffer + 100;
+            txInfos.fields[3].item = "To";
+            txInfos.fields[3].value = toAddress;
+            txInfos.fields[4].item = "From";
+            txInfos.fields[4].value = fromAddress;
+            pairList.nbPairs = 5;
+            txInfos.flowTitle = "Delegate Resource";
+            infoLongPress.text = "Confirm Delegate";
+            break;
+        case APPROVAL_UNDELEGATE_RESOURCE_TRANSACTION:
+            txInfos.confirmCb = (nbgl_callback_t) ui_callback_address_ok;
+            txInfos.fields[0].item = "Resource";
+            txInfos.fields[0].value = fullContract;
+            txInfos.fields[1].item = "Amount";
+            txInfos.fields[1].value = G_io_apdu_buffer;
+            txInfos.fields[2].item = "To";
+            txInfos.fields[2].value = fromAddress;
+            txInfos.fields[3].item = "From";
+            txInfos.fields[3].value = toAddress;
+            pairList.nbPairs = 4;
+            txInfos.flowTitle = "Undelegate Resource";
+            infoLongPress.text = "Confirm Undelegate";
+            break;
+        case APPROVAL_WITHDRAWEXPIREUNFREEZE_TRANSACTION:
+            txInfos.confirmCb = (nbgl_callback_t) ui_callback_address_ok;
+            txInfos.fields[0].item = "FROM";
+            txInfos.fields[0].value = fromAddress;
+            pairList.nbPairs = 1;
+            txInfos.flowTitle = "Withdraw Unfreeze";
+            infoLongPress.text = "Confirm Withdraw";
+            break;
         default:
             PRINTF("This should not happen !\n");
             break;

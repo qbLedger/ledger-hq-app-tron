@@ -39,6 +39,11 @@ typedef union {
     protocol_FreezeBalanceContract freeze_balance_contract;
     protocol_UnfreezeBalanceContract unfreeze_balance_contract;
     protocol_AccountPermissionUpdateContract account_permission_update_contract;
+    protocol_FreezeBalanceV2Contract freeze_balance_v2_contract;
+    protocol_UnfreezeBalanceV2Contract unfreeze_balance_v2_contract;
+    protocol_WithdrawExpireUnfreezeContract withdraw_expire_unfreeze_contract;
+    protocol_DelegateResourceContract delegate_resource_contract;
+    protocol_UnDelegateResourceContract undelegate_resource_contract;
 } contract_t;
 
 extern contract_t msg;
@@ -74,6 +79,12 @@ typedef enum contractType_e {
     EXCHANGETRANSACTIONCONTRACT,
     UPDATEENERGYLIMITCONTRACT,
     ACCOUNTPERMISSIONUPDATECONTRACT,
+    FREEZEBALANCEV2CONTRACT = 54,
+    UNFREEZEBALANCEV2CONTRACT,
+    WITHDRAWEXPIREUNFREEZECONTRACT,
+    DELEGATERESOURCECONTRACT,
+    UNDELEGATERESOURCECONTRACT,
+    
     UNKNOWN_CONTRACT = 254,
     INVALID_CONTRACT = 255
 } contractType_e;
@@ -124,6 +135,7 @@ typedef struct txContent_t {
     contractType_e contractType;
     uint64_t dataBytes;
     uint8_t permission_id;
+    uint32_t customData;
     publicKeyContext_t *publicKeyContext;
 } txContent_t;
 
