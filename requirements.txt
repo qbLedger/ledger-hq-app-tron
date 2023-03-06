@@ -5,7 +5,7 @@ base58==1.0.3
 crypto==1.4.1
 cryptography==2.8
 eth-keys==0.3.1
-ledgerblue==0.1.31
+ledgerblue==0.1.45
 ragger[speculos]>=1.6.0
 ragger[ledgerwallet]>=1.6.0
 ecdsa>=0.16.1,<0.17.0

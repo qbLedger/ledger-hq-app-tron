@@ -29,6 +29,7 @@ jobs:
         include:
           - device: nanos
           - device: nanox
+          - device: nanosp
     runs-on: ubuntu-latest
     steps:
       - name: Clone
