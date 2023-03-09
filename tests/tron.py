@@ -216,35 +216,15 @@ class TronClient:
         if (field & 0x07 == 0): return newpos
         return size + newpos
     
-    def wait_for_tx_screen(self):
-        start = time()
-        timeout = 25
-        sign_txt = "Sign"
-        if self._firmware.device in ["nanox", "nanosp"]:
-            sign_txt = "ign"
-        tx_texts = [sign_txt,"Review","Approve","Claim","Verify","Permission"]
-        is_found = False
-        while not is_found:
-            for txt in tx_texts :
-                if self._client.compare_screen_with_text(txt):
-                    is_found = True
-                    break
-            # Give some time to other threads, and mostly Speculos one
-            sleep(0.2)
-            if (time() - start > timeout):
-                raise TimeoutError("Timeout waiting for home screen")            
-        # Speculos has received at least one new event to redisplay the screen
-        # Wait a bit to ensure the event batch is received and processed by Speculos before returning
-        sleep(0.2)
-
     @contextmanager
     def exchange_async_and_navigate(self,
                                     pack,
                                     snappath: Path = None,
                                     text: str = ""):
         with self._client.exchange_async_raw(pack):
-            self.wait_for_tx_screen()
+            # self.wait_for_tx_screen()
             if self._firmware.device == "stax":
+                sleep(1.5)
                 self._navigator.navigate_until_text_and_compare(
                     # Use custom touch coordinates to account for warning approve 
                     # button position.
@@ -262,6 +242,8 @@ class TronClient:
                     Path(__file__).parent.resolve(),
                     snappath,
                     screen_change_after_last_instruction=False)
+            # self.wait_for_home_screen()
+            
 
     def getVersion(self):
         pack = self.apduMessage(InsType.GET_APP_CONFIGURATION, 0x00, 0x00,
