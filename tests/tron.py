@@ -215,18 +215,17 @@ class TronClient:
         size, newpos = _DecodeVarint32(tx, pos)
         if (field & 0x07 == 0): return newpos
         return size + newpos
-    
+
     @contextmanager
     def exchange_async_and_navigate(self,
                                     pack,
                                     snappath: Path = None,
                                     text: str = ""):
         with self._client.exchange_async_raw(pack):
-            # self.wait_for_tx_screen()
             if self._firmware.device == "stax":
                 sleep(1.5)
                 self._navigator.navigate_until_text_and_compare(
-                    # Use custom touch coordinates to account for warning approve 
+                    # Use custom touch coordinates to account for warning approve
                     # button position.
                     NavIns(NavInsID.TOUCH, (200, 545)),
                     [NavIns(NavInsID.USE_CASE_REVIEW_CONFIRM)],
@@ -242,8 +241,6 @@ class TronClient:
                     Path(__file__).parent.resolve(),
                     snappath,
                     screen_change_after_last_instruction=False)
-            # self.wait_for_home_screen()
-            
 
     def getVersion(self):
         pack = self.apduMessage(InsType.GET_APP_CONFIGURATION, 0x00, 0x00,
@@ -328,7 +325,7 @@ class TronClient:
 
             else:
                 if navigate:
-                    self.exchange_async_and_navigate(pack,snappath,text)
+                    self.exchange_async_and_navigate(pack, snappath, text)
                 else:
                     self._client.exchange_async_raw(pack)
                 sleep(0.5)
