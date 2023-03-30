@@ -603,7 +603,7 @@ void handleSign(uint8_t p1,
                             ((txContent.dataBytes > 0) ? true : false));
 
             break;
-        case FREEZEBALANCEV2CONTRACT: // Freeze TRX
+        case FREEZEBALANCEV2CONTRACT:  // Freeze TRX
             if (txContent.resource == 0)
                 strcpy(fullContract, "Bandwidth");
             else
@@ -611,12 +611,14 @@ void handleSign(uint8_t p1,
 
             print_amount(txContent.amount[0], (char *) G_io_apdu_buffer, 100, SUN_DIG);
             getBase58FromAddress(txContent.account,
-                (uint8_t *)toAddress, &sha2, HAS_SETTING(S_TRUNCATE_ADDRESS));
+                                 (uint8_t *) toAddress,
+                                 &sha2,
+                                 HAS_SETTING(S_TRUNCATE_ADDRESS));
 
             ux_flow_display(APPROVAL_FREEZEASSETV2_TRANSACTION,
-                            ((txContent.dataBytes>0)? true : false));
+                            ((txContent.dataBytes > 0) ? true : false));
             break;
-        case UNFREEZEBALANCEV2CONTRACT: // unreeze TRX
+        case UNFREEZEBALANCEV2CONTRACT:  // unreeze TRX
             if (txContent.resource == 0)
                 strcpy(fullContract, "Bandwidth");
             else
@@ -624,13 +626,15 @@ void handleSign(uint8_t p1,
 
             print_amount(txContent.amount[0], (char *) G_io_apdu_buffer, 100, SUN_DIG);
             getBase58FromAddress(txContent.account,
-                (uint8_t *)toAddress, &sha2, HAS_SETTING(S_TRUNCATE_ADDRESS));
+                                 (uint8_t *) toAddress,
+                                 &sha2,
+                                 HAS_SETTING(S_TRUNCATE_ADDRESS));
 
             ux_flow_display(APPROVAL_UNFREEZEASSETV2_TRANSACTION,
-                            ((txContent.dataBytes>0)? true : false));
+                            ((txContent.dataBytes > 0) ? true : false));
 
             break;
-        case DELEGATERESOURCECONTRACT: // Delegate resource
+        case DELEGATERESOURCECONTRACT:  // Delegate resource
             if (txContent.resource == 0)
                 strcpy(fullContract, "Bandwidth");
             else
@@ -644,13 +648,15 @@ void handleSign(uint8_t p1,
 
             print_amount(txContent.amount[0], (char *) G_io_apdu_buffer, 100, SUN_DIG);
             getBase58FromAddress(txContent.destination,
-                (uint8_t *)toAddress, &sha2, HAS_SETTING(S_TRUNCATE_ADDRESS));
+                                 (uint8_t *) toAddress,
+                                 &sha2,
+                                 HAS_SETTING(S_TRUNCATE_ADDRESS));
 
             ux_flow_display(APPROVAL_DELEGATE_RESOURCE_TRANSACTION,
-                ((txContent.dataBytes>0)? true : false));
+                            ((txContent.dataBytes > 0) ? true : false));
 
             break;
-        case UNDELEGATERESOURCECONTRACT: // Undelegate resource
+        case UNDELEGATERESOURCECONTRACT:  // Undelegate resource
             if (txContent.resource == 0)
                 strcpy(fullContract, "Bandwidth");
             else
@@ -658,18 +664,22 @@ void handleSign(uint8_t p1,
 
             print_amount(txContent.amount[0], (char *) G_io_apdu_buffer, 100, SUN_DIG);
             getBase58FromAddress(txContent.destination,
-                (uint8_t *)toAddress, &sha2, HAS_SETTING(S_TRUNCATE_ADDRESS));
+                                 (uint8_t *) toAddress,
+                                 &sha2,
+                                 HAS_SETTING(S_TRUNCATE_ADDRESS));
 
             ux_flow_display(APPROVAL_UNDELEGATE_RESOURCE_TRANSACTION,
-                ((txContent.dataBytes>0)? true : false));
+                            ((txContent.dataBytes > 0) ? true : false));
 
             break;
-        case WITHDRAWEXPIREUNFREEZECONTRACT: // Withdraw Expire Unfreeze
+        case WITHDRAWEXPIREUNFREEZECONTRACT:  // Withdraw Expire Unfreeze
             getBase58FromAddress(txContent.account,
-                (uint8_t *)toAddress, &sha2, HAS_SETTING(S_TRUNCATE_ADDRESS));
-            
+                                 (uint8_t *) toAddress,
+                                 &sha2,
+                                 HAS_SETTING(S_TRUNCATE_ADDRESS));
+
             ux_flow_display(APPROVAL_WITHDRAWEXPIREUNFREEZE_TRANSACTION,
-                ((txContent.dataBytes>0)? true : false));
+                            ((txContent.dataBytes > 0) ? true : false));
 
             break;
         case WITHDRAWBALANCECONTRACT:  // Claim Rewards

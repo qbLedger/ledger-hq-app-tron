@@ -352,7 +352,7 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
             txInfos.fields[1].item = "Amount";
             txInfos.fields[1].value = G_io_apdu_buffer;
             txInfos.fields[2].item = "Lock";
-            txInfos.fields[2].value = (char*)G_io_apdu_buffer + 100;
+            txInfos.fields[2].value = (char *) G_io_apdu_buffer + 100;
             txInfos.fields[3].item = "To";
             txInfos.fields[3].value = toAddress;
             txInfos.fields[4].item = "From";

@@ -169,8 +169,8 @@ bool setContractType(contractType_e type, char *out, size_t outlen) {
             strlcpy(out, "Unfreeze Asset", outlen);
             break;
         case WITHDRAWEXPIREUNFREEZECONTRACT:
-            strlcpy(out,"Withdraw Unfreeze", outlen);
-            break;  
+            strlcpy(out, "Withdraw Unfreeze", outlen);
+            break;
         case UPDATEASSETCONTRACT:
             strlcpy(out, "Update Asset", outlen);
             break;
@@ -454,14 +454,13 @@ static bool unfreeze_balance_contract(txContent_t *content, pb_istream_t *stream
 
 static bool freeze_balance_v2_contract(txContent_t *content, pb_istream_t *stream) {
     if (!pb_decode(stream,
-                    protocol_FreezeBalanceV2Contract_fields,
-                    &msg.freeze_balance_v2_contract)) {
+                   protocol_FreezeBalanceV2Contract_fields,
+                   &msg.freeze_balance_v2_contract)) {
         return false;
     }
 
     COPY_ADDRESS(content->account, &msg.freeze_balance_v2_contract.owner_address);
-    COPY_ADDRESS(content->destination,
-                &msg.freeze_balance_v2_contract.owner_address);
+    COPY_ADDRESS(content->destination, &msg.freeze_balance_v2_contract.owner_address);
     content->amount[0] = msg.freeze_balance_v2_contract.frozen_balance;
     content->resource = msg.freeze_balance_v2_contract.resource;
     return true;
@@ -469,23 +468,22 @@ static bool freeze_balance_v2_contract(txContent_t *content, pb_istream_t *strea
 
 static bool unfreeze_balance_v2_contract(txContent_t *content, pb_istream_t *stream) {
     if (!pb_decode(stream,
-                    protocol_UnfreezeBalanceV2Contract_fields,
-                    &msg.unfreeze_balance_v2_contract)) {
+                   protocol_UnfreezeBalanceV2Contract_fields,
+                   &msg.unfreeze_balance_v2_contract)) {
         return false;
     }
     content->resource = msg.unfreeze_balance_v2_contract.resource;
     content->amount[0] = msg.unfreeze_balance_v2_contract.unfreeze_balance;
 
     COPY_ADDRESS(content->account, &msg.unfreeze_balance_v2_contract.owner_address);
-    COPY_ADDRESS(content->destination,
-                &msg.unfreeze_balance_v2_contract.owner_address);
+    COPY_ADDRESS(content->destination, &msg.unfreeze_balance_v2_contract.owner_address);
     return true;
 }
 
 static bool withdraw_expire_unfreeze_contract(txContent_t *content, pb_istream_t *stream) {
     if (!pb_decode(stream,
-                    protocol_WithdrawExpireUnfreezeContract_fields,
-                    &msg.withdraw_expire_unfreeze_contract)) {
+                   protocol_WithdrawExpireUnfreezeContract_fields,
+                   &msg.withdraw_expire_unfreeze_contract)) {
         return false;
     }
     COPY_ADDRESS(content->account, &msg.withdraw_expire_unfreeze_contract.owner_address);
@@ -494,8 +492,8 @@ static bool withdraw_expire_unfreeze_contract(txContent_t *content, pb_istream_t
 
 static bool delegate_resource_contract(txContent_t *content, pb_istream_t *stream) {
     if (!pb_decode(stream,
-                    protocol_DelegateResourceContract_fields,
-                    &msg.delegate_resource_contract)) {
+                   protocol_DelegateResourceContract_fields,
+                   &msg.delegate_resource_contract)) {
         return false;
     }
     content->resource = msg.delegate_resource_contract.resource;
@@ -503,23 +501,21 @@ static bool delegate_resource_contract(txContent_t *content, pb_istream_t *strea
     content->customData = msg.delegate_resource_contract.lock;
 
     COPY_ADDRESS(content->account, &msg.delegate_resource_contract.owner_address);
-    COPY_ADDRESS(content->destination,
-                &msg.delegate_resource_contract.receiver_address);
+    COPY_ADDRESS(content->destination, &msg.delegate_resource_contract.receiver_address);
     return true;
 }
 
 static bool undelegate_resource_contrace(txContent_t *content, pb_istream_t *stream) {
     if (!pb_decode(stream,
-                    protocol_UnDelegateResourceContract_fields,
-                    &msg.undelegate_resource_contract)) {
+                   protocol_UnDelegateResourceContract_fields,
+                   &msg.undelegate_resource_contract)) {
         return false;
     }
     content->resource = msg.undelegate_resource_contract.resource;
     content->amount[0] = msg.undelegate_resource_contract.balance;
 
     COPY_ADDRESS(content->account, &msg.undelegate_resource_contract.owner_address);
-    COPY_ADDRESS(content->destination,
-                &msg.undelegate_resource_contract.receiver_address);
+    COPY_ADDRESS(content->destination, &msg.undelegate_resource_contract.receiver_address);
     return true;
 }
 
