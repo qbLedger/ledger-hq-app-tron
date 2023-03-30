@@ -64,9 +64,9 @@ APPVERSION_P=$(call splitVersion, $(APPVERSION), 3)
 #prepare hsm generation
 ifeq ($(TARGET_NAME), TARGET_NANOS)
 ICONNAME=icons/nanos_app_tron.gif
-else 
+else
 ifeq ($(TARGET_NAME),TARGET_STAX)
-ICONNAME=icons/stax_app_tron.bmp
+ICONNAME=icons/stax_app_tron.gif
 else
 ICONNAME=icons/nanox_app_tron.gif
 endif
