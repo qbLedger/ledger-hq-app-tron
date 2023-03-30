@@ -321,7 +321,6 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
             infoLongPress.text = "Confirm Approve";
             break;
         case APPROVAL_FREEZEASSETV2_TRANSACTION:
-            txInfos.confirmCb = (nbgl_callback_t) ui_callback_address_ok;
             txInfos.fields[0].item = "Gain";
             txInfos.fields[0].value = fullContract;
             txInfos.fields[1].item = "Amount";
@@ -335,7 +334,6 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
             infoLongPress.text = "Confirm FreezeV2";
             break;
         case APPROVAL_UNFREEZEASSETV2_TRANSACTION:
-            txInfos.confirmCb = (nbgl_callback_t) ui_callback_address_ok;
             txInfos.fields[0].item = "Resource";
             txInfos.fields[0].value = fullContract;
             txInfos.fields[1].item = "Amount";
@@ -349,7 +347,6 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
             infoLongPress.text = "Confirm UnfreezeV2";
             break;
         case APPROVAL_DELEGATE_RESOURCE_TRANSACTION:
-            txInfos.confirmCb = (nbgl_callback_t) ui_callback_address_ok;
             txInfos.fields[0].item = "Resource";
             txInfos.fields[0].value = fullContract;
             txInfos.fields[1].item = "Amount";
@@ -365,7 +362,6 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
             infoLongPress.text = "Confirm Delegate";
             break;
         case APPROVAL_UNDELEGATE_RESOURCE_TRANSACTION:
-            txInfos.confirmCb = (nbgl_callback_t) ui_callback_address_ok;
             txInfos.fields[0].item = "Resource";
             txInfos.fields[0].value = fullContract;
             txInfos.fields[1].item = "Amount";
@@ -379,7 +375,6 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
             infoLongPress.text = "Confirm Undelegate";
             break;
         case APPROVAL_WITHDRAWEXPIREUNFREEZE_TRANSACTION:
-            txInfos.confirmCb = (nbgl_callback_t) ui_callback_address_ok;
             txInfos.fields[0].item = "FROM";
             txInfos.fields[0].value = fromAddress;
             pairList.nbPairs = 1;
