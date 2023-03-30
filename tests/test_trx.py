@@ -592,27 +592,25 @@ class TestTRX:
         self.sign_and_validate(client, firmware, 0, tx)
 
     def test_trx_freezeV2_balance(self, backend, configuration, firmware,
-                                   navigator):
+                                  navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.FreezeBalanceV2Contract,
-            contract.FreezeBalanceV2Contract(
-                owner_address=bytes.fromhex(
-                    client.getAccount(0)['addressHex']),
-                frozen_balance=100000000,
-                resource=contract.ENERGY))
+            contract.FreezeBalanceV2Contract(owner_address=bytes.fromhex(
+                client.getAccount(0)['addressHex']),
+                                             frozen_balance=100000000,
+                                             resource=contract.ENERGY))
         self.sign_and_validate(client, firmware, 0, tx)
 
     def test_trx_unfreezeV2_balance(self, backend, configuration, firmware,
-                                   navigator):
+                                    navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.UnfreezeBalanceV2Contract,
-            contract.UnfreezeBalanceV2Contract(
-                owner_address=bytes.fromhex(
-                    client.getAccount(0)['addressHex']),
-                unfreeze_balance=100000000,
-                resource=contract.ENERGY))
+            contract.UnfreezeBalanceV2Contract(owner_address=bytes.fromhex(
+                client.getAccount(0)['addressHex']),
+                                               unfreeze_balance=100000000,
+                                               resource=contract.ENERGY))
         self.sign_and_validate(client, firmware, 0, tx)
 
     def test_trx_delegate_resource(self, backend, configuration, firmware,
@@ -631,7 +629,7 @@ class TestTRX:
         self.sign_and_validate(client, firmware, 0, tx)
 
     def test_trx_undelegate_resource(self, backend, configuration, firmware,
-                                   navigator):
+                                     navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.UnDelegateResourceContract,
