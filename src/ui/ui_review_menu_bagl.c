@@ -329,6 +329,220 @@ UX_DEF(ux_approval_unfreeze_data_warning_flow,
        &ux_approval_confirm_step,
        &ux_approval_reject_step);
 
+// FREEZEV2 TRANSACTION
+//////////////////////////////////////////////////////////////////////
+UX_STEP_NOCB(ux_approval_freeze_v2_flow_1_step,
+             pnn,
+             {
+                 &C_icon_eye,
+                 "Review",
+                 "FreezeV2",
+             });
+UX_STEP_NOCB(ux_approval_freeze_v2_flow_2_step,
+             bnnn_paging,
+             {.title = "Gain", .text = (const char *) fullContract});
+UX_STEP_NOCB(ux_approval_freeze_v2_flow_3_step,
+             bnnn_paging,
+             {
+                 .title = "Amount",
+                 .text = (char *) G_io_apdu_buffer,
+             });
+UX_STEP_NOCB(ux_approval_freeze_v2_flow_4_step,
+             bnnn_paging,
+             {
+                 .title = "Freeze To",
+                 .text = toAddress,
+             });
+
+UX_DEF(ux_approval_freeze_v2_flow,
+       &ux_approval_freeze_v2_flow_1_step,
+       &ux_approval_freeze_v2_flow_2_step,
+       &ux_approval_freeze_v2_flow_3_step,
+       &ux_approval_freeze_v2_flow_4_step,
+       &ux_approval_from_address_step,
+       &ux_approval_confirm_step,
+       &ux_approval_reject_step);
+
+UX_DEF(ux_approval_freeze_v2_data_warning_flow,
+       &ux_approval_freeze_v2_flow_1_step,
+       &ux_approval_tx_data_warning_step,
+       &ux_approval_freeze_v2_flow_2_step,
+       &ux_approval_freeze_v2_flow_3_step,
+       &ux_approval_freeze_v2_flow_4_step,
+       &ux_approval_from_address_step,
+       &ux_approval_confirm_step,
+       &ux_approval_reject_step);
+
+UX_STEP_NOCB(ux_approval_unfreeze_v2_flow_1_step,
+             pnn,
+             {
+                 &C_icon_eye,
+                 "Review",
+                 "UnfreezeV2",
+             });
+UX_STEP_NOCB(ux_approval_unfreeze_v2_flow_2_step,
+             bnnn_paging,
+             {.title = "Resource", .text = (const char *) fullContract});
+UX_STEP_NOCB(ux_approval_unfreeze_v2_flow_3_step,
+             bnnn_paging,
+             {
+                 .title = "Unfreeze To",
+                 .text = toAddress,
+             });
+UX_STEP_NOCB(ux_approval_unfreeze_v2_flow_show_amount_step,
+             bnnn_paging,
+             {
+                 .title = "Amount",
+                 .text = (char *) G_io_apdu_buffer,
+             });
+
+UX_DEF(ux_approval_unfreeze_v2_flow,
+       &ux_approval_unfreeze_v2_flow_1_step,
+       &ux_approval_unfreeze_v2_flow_2_step,
+       &ux_approval_unfreeze_v2_flow_show_amount_step,
+       &ux_approval_unfreeze_v2_flow_3_step,
+       &ux_approval_from_address_step,
+       &ux_approval_confirm_step,
+       &ux_approval_reject_step);
+
+UX_DEF(ux_approval_unfreeze_v2_data_warning_flow,
+       &ux_approval_unfreeze_v2_flow_1_step,
+       &ux_approval_tx_data_warning_step,
+       &ux_approval_unfreeze_v2_flow_2_step,
+       &ux_approval_unfreeze_v2_flow_show_amount_step,
+       &ux_approval_unfreeze_v2_flow_3_step,
+       &ux_approval_from_address_step,
+       &ux_approval_confirm_step,
+       &ux_approval_reject_step);
+
+// DELEGATE TRANSACTION
+//////////////////////////////////////////////////////////////////////
+UX_STEP_NOCB(ux_approval_delegate_resource_flow_review_step,
+             pnn,
+             {
+                 &C_icon_eye,
+                 "Review",
+                 "Delegate",
+             });
+UX_STEP_NOCB(ux_approval_delegate_resource_flow_resource_step,
+             bnnn_paging,
+             {.title = "Resource", .text = (const char *) fullContract});
+UX_STEP_NOCB(ux_approval_delegate_flow_show_amount_step,
+             bnnn_paging,
+             {
+                 .title = "Amount",
+                 .text = (char *) G_io_apdu_buffer,
+             });
+UX_STEP_NOCB(ux_approval_delegate_resource_flow_check_lock_step,
+             bnnn_paging,
+             {
+                 .title = "Is Lock",
+                 .text = (const char *) G_io_apdu_buffer + 100,
+             });
+
+UX_STEP_NOCB(ux_approval_delegate_resource_flow_delegate_to_step,
+             bnnn_paging,
+             {
+                 .title = "Delegate To",
+                 .text = toAddress,
+             });
+
+UX_DEF(ux_approval_delegate_resource_data_warning_flow,
+       &ux_approval_delegate_resource_flow_review_step,
+       &ux_approval_tx_data_warning_step,
+       &ux_approval_delegate_resource_flow_resource_step,
+       &ux_approval_delegate_flow_show_amount_step,
+       &ux_approval_delegate_resource_flow_check_lock_step,
+       &ux_approval_delegate_resource_flow_delegate_to_step,
+       &ux_approval_from_address_step,
+       &ux_approval_confirm_step,
+       &ux_approval_reject_step);
+
+UX_DEF(ux_approval_delegate_resource_flow,
+       &ux_approval_delegate_resource_flow_review_step,
+       &ux_approval_delegate_resource_flow_resource_step,
+       &ux_approval_delegate_flow_show_amount_step,
+       &ux_approval_delegate_resource_flow_check_lock_step,
+       &ux_approval_delegate_resource_flow_delegate_to_step,
+       &ux_approval_from_address_step,
+       &ux_approval_confirm_step,
+       &ux_approval_reject_step);
+
+// UNDELEGATE TRANSACTION
+//////////////////////////////////////////////////////////////////////
+UX_STEP_NOCB(ux_approval_undelegate_resource_flow_review_step,
+             pnn,
+             {
+                 &C_icon_eye,
+                 "Review",
+                 "Undelegate",
+             });
+UX_STEP_NOCB(ux_approval_undelegate_resource_flow_resource_step,
+             bnnn_paging,
+             {.title = "Resource", .text = (const char *) fullContract});
+UX_STEP_NOCB(ux_approval_undelegate_flow_show_amount_step,
+             bnnn_paging,
+             {
+                 .title = "Amount",
+                 .text = (char *) G_io_apdu_buffer,
+             });
+
+UX_STEP_NOCB(ux_approval_undelegate_resource_flow_undelegate_to_step,
+             bnnn_paging,
+             {
+                 .title = "Undelegate To",
+                 .text = fromAddress,
+             });
+
+UX_STEP_NOCB(ux_approval_undelegate_resource_flow_undelegate_from_step,
+             bnnn_paging,
+             {
+                 .title = "Undelegate From",
+                 .text = toAddress,
+             });
+
+UX_DEF(ux_approval_undelegate_resource_data_warning_flow,
+       &ux_approval_undelegate_resource_flow_review_step,
+       &ux_approval_tx_data_warning_step,
+       &ux_approval_undelegate_resource_flow_resource_step,
+       &ux_approval_undelegate_flow_show_amount_step,
+       &ux_approval_undelegate_resource_flow_undelegate_to_step,
+       &ux_approval_undelegate_resource_flow_undelegate_from_step,
+       &ux_approval_confirm_step,
+       &ux_approval_reject_step);
+
+UX_DEF(ux_approval_undelegate_resource_flow,
+       &ux_approval_undelegate_resource_flow_review_step,
+       &ux_approval_undelegate_resource_flow_resource_step,
+       &ux_approval_undelegate_flow_show_amount_step,
+       &ux_approval_undelegate_resource_flow_undelegate_to_step,
+       &ux_approval_undelegate_resource_flow_undelegate_from_step,
+       &ux_approval_confirm_step,
+       &ux_approval_reject_step);
+
+// WITHDRAW EXPIRE UNFREEZE TRANSACTION
+//////////////////////////////////////////////////////////////////////
+UX_STEP_NOCB(ux_approval_withdraw_expire_unfreeze_flow_1_step,
+             pnn,
+             {
+                 &C_icon_eye,
+                 "Withdraw",
+                 "Unfreeze",
+             });
+
+UX_DEF(ux_approval_withdraw_expire_unfreeze_flow,
+       &ux_approval_withdraw_expire_unfreeze_flow_1_step,
+       &ux_approval_from_address_step,
+       &ux_approval_confirm_step,
+       &ux_approval_reject_step);
+
+UX_DEF(ux_approval_withdraw_expire_unfreeze_data_warning_flow,
+       &ux_approval_withdraw_expire_unfreeze_flow_1_step,
+       &ux_approval_tx_data_warning_step,
+       &ux_approval_from_address_step,
+       &ux_approval_confirm_step,
+       &ux_approval_reject_step);
+
 // WITHDRAW BALANCE TRANSACTION
 //////////////////////////////////////////////////////////////////////
 UX_STEP_NOCB(ux_approval_withdraw_balance_flow_1_step,
@@ -723,6 +937,37 @@ void ux_flow_display(ui_approval_state_t state, bool data_warning) {
             break;
         case APPROVAL_VERIFY_ADDRESS:
             ux_flow_init(0, ux_display_public_flow, NULL);
+            break;
+        case APPROVAL_FREEZEASSETV2_TRANSACTION:
+            ux_flow_init(0,
+                         ((data_warning == true) ? ux_approval_freeze_v2_data_warning_flow
+                                                 : ux_approval_freeze_v2_flow),
+                         NULL);
+            break;
+        case APPROVAL_UNFREEZEASSETV2_TRANSACTION:
+            ux_flow_init(0,
+                         ((data_warning == true) ? ux_approval_unfreeze_v2_data_warning_flow
+                                                 : ux_approval_unfreeze_v2_flow),
+                         NULL);
+            break;
+        case APPROVAL_DELEGATE_RESOURCE_TRANSACTION:
+            ux_flow_init(0,
+                         ((data_warning == true) ? ux_approval_delegate_resource_data_warning_flow
+                                                 : ux_approval_delegate_resource_flow),
+                         NULL);
+            break;
+        case APPROVAL_UNDELEGATE_RESOURCE_TRANSACTION:
+            ux_flow_init(0,
+                         ((data_warning == true) ? ux_approval_undelegate_resource_data_warning_flow
+                                                 : ux_approval_undelegate_resource_flow),
+                         NULL);
+            break;
+        case APPROVAL_WITHDRAWEXPIREUNFREEZE_TRANSACTION:
+            ux_flow_init(
+                0,
+                ((data_warning == true) ? ux_approval_withdraw_expire_unfreeze_data_warning_flow
+                                        : ux_approval_withdraw_expire_unfreeze_flow),
+                NULL);
             break;
         default:
             PRINTF("This should not happen !\n");
