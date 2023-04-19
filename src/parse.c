@@ -797,8 +797,8 @@ parserStatus_e processTx(uint8_t *buffer, uint32_t length, txContent_t *content)
 
     /* Set callback to determine if transaction contains custom data.
      * This allows to retrieve the size of arbitrary data. */
-    transaction.data.funcs.decode = pb_get_tx_data_size;
-    transaction.data.arg = &content->dataBytes;
+    transaction.custom_data.funcs.decode = pb_get_tx_data_size;
+    transaction.custom_data.arg = &content->dataBytes;
 
     if (!pb_decode(&stream, protocol_Transaction_raw_fields, &transaction)) {
         return USTREAM_FAULT;
