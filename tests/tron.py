@@ -197,7 +197,7 @@ class TronClient:
         tx.raw_data.ref_block_hash = bytes.fromhex("95DA42177DB00507")
         tx.raw_data.ref_block_bytes = bytes.fromhex("3DCE")
         if data:
-            tx.raw_data.data = data
+            tx.raw_data.custom_data = data
 
         c = tx.raw_data.contract.add()
         c.type = contractType
