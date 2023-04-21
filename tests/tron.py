@@ -26,6 +26,8 @@ from core import Tron_pb2 as tron
 from google.protobuf.any_pb2 import Any
 from google.protobuf.internal.decoder import _DecodeVarint32
 
+ROOT_SCREENSHOT_PATH = Path(__file__).parent.resolve()
+
 MAX_APDU_LEN: int = 255
 
 CLA: int = 0xE0
@@ -230,7 +232,7 @@ class TronClient:
                     NavIns(NavInsID.TOUCH, (200, 545)),
                     [NavIns(NavInsID.USE_CASE_REVIEW_CONFIRM)],
                     text,
-                    Path(__file__).parent.resolve(),
+                    ROOT_SCREENSHOT_PATH,
                     snappath,
                     screen_change_after_last_instruction=False)
             else:
@@ -238,7 +240,7 @@ class TronClient:
                     NavIns(NavInsID.RIGHT_CLICK),
                     [NavIns(NavInsID.BOTH_CLICK)],
                     text,
-                    Path(__file__).parent.resolve(),
+                    ROOT_SCREENSHOT_PATH,
                     snappath,
                     screen_change_after_last_instruction=False)
 
