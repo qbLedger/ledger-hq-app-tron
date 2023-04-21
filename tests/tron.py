@@ -225,16 +225,16 @@ class TronClient:
                                     text: str = ""):
         with self._client.exchange_async_raw(pack):
             if self._firmware.device == "stax":
-                sleep(1.5)
                 self._navigator.navigate_until_text_and_compare(
                     # Use custom touch coordinates to account for warning approve
                     # button position.
                     NavIns(NavInsID.TOUCH, (200, 545)),
-                    [NavIns(NavInsID.USE_CASE_REVIEW_CONFIRM)],
+                    [NavInsID.USE_CASE_REVIEW_CONFIRM,
+                     NavInsID.USE_CASE_STATUS_DISMISS],
                     text,
                     ROOT_SCREENSHOT_PATH,
                     snappath,
-                    screen_change_after_last_instruction=False)
+                    screen_change_before_first_instruction=True)
             else:
                 self._navigator.navigate_until_text_and_compare(
                     NavIns(NavInsID.RIGHT_CLICK),
@@ -242,7 +242,7 @@ class TronClient:
                     text,
                     ROOT_SCREENSHOT_PATH,
                     snappath,
-                    screen_change_after_last_instruction=False)
+                    screen_change_before_first_instruction=True)
 
     def getVersion(self):
         pack = self.apduMessage(InsType.GET_APP_CONFIGURATION, 0x00, 0x00,
