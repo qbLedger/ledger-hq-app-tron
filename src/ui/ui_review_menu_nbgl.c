@@ -40,8 +40,8 @@ enum {
 typedef struct {
     nbgl_layoutTagValue_t fields[MAX_TX_FIELDS];
     bool warnings[WARNING_TYPES_NUMBER];
-    char *flowTitle;
-    char *flowSubtitle;
+    const char *flowTitle;
+    const char *flowSubtitle;
     nbgl_callback_t confirmCb;
     nbgl_callback_t rejectCb;
 } nbgl_tx_infos_t;
@@ -149,7 +149,7 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
     memset(&infoLongPress, 0, sizeof(infoLongPress));
 
     txInfos.warnings[DATA_WARNING] = data_warning;
-    txInfos.flowTitle = (char *) "Review Transaction";
+    txInfos.flowTitle = "Review Transaction";
     txInfos.rejectCb = (nbgl_callback_t) ui_callback_tx_cancel;
     txInfos.confirmCb = (nbgl_callback_t) ui_callback_tx_ok;
 
@@ -162,7 +162,7 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
     switch (state) {
         case APPROVAL_TRANSFER:
             txInfos.fields[0].item = "Amount";
-            txInfos.fields[0].value = (char *) G_io_apdu_buffer;
+            txInfos.fields[0].value = (const char *) G_io_apdu_buffer;
             txInfos.fields[1].item = "Token";
             txInfos.fields[1].value = fullContract;
             txInfos.fields[2].item = TRC20ActionSendAllow;
@@ -185,23 +185,23 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
             txInfos.fields[1].item = "From Address";
             txInfos.fields[1].value = fromAddress;
             pairList.nbPairs = 2;
-            txInfos.flowTitle = (char *) "Review";
-            txInfos.flowSubtitle = (char *) "Permission Update";
+            txInfos.flowTitle = "Review";
+            txInfos.flowSubtitle = "Permission Update";
             infoLongPress.text = "Confirm Update";
             break;
         case APPROVAL_EXCHANGE_CREATE:
             txInfos.fields[0].item = "Token 1";
             txInfos.fields[0].value = fullContract;
             txInfos.fields[1].item = "Amount 1";
-            txInfos.fields[1].value = (char *) G_io_apdu_buffer;
+            txInfos.fields[1].value = (const char *) G_io_apdu_buffer;
             txInfos.fields[2].item = "Token 2";
             txInfos.fields[2].value = toAddress;
             txInfos.fields[3].item = "Amount 2";
-            txInfos.fields[3].value = (char *) G_io_apdu_buffer + 100;
+            txInfos.fields[3].value = (const char *) G_io_apdu_buffer + 100;
             txInfos.fields[4].item = "From Address";
             txInfos.fields[4].value = fromAddress;
             pairList.nbPairs = 5;
-            txInfos.flowTitle = (char *) "Review Exchange";
+            txInfos.flowTitle = "Review Exchange";
             infoLongPress.text = "Accept and Create\nExchange";
             break;
         case APPROVAL_EXCHANGE_TRANSACTION:
@@ -210,22 +210,22 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
             txInfos.fields[1].item = "Token pair";
             txInfos.fields[1].value = fullContract;
             txInfos.fields[2].item = "Amount";
-            txInfos.fields[2].value = (char *) G_io_apdu_buffer;
+            txInfos.fields[2].value = (const char *) G_io_apdu_buffer;
             txInfos.fields[3].item = "Expected";
-            txInfos.fields[3].value = (char *) G_io_apdu_buffer + 100;
+            txInfos.fields[3].value = (const char *) G_io_apdu_buffer + 100;
             txInfos.fields[4].item = "From Address";
             txInfos.fields[4].value = fromAddress;
             pairList.nbPairs = 5;
             break;
         case APPROVAL_EXCHANGE_WITHDRAW_INJECT:
             txInfos.fields[0].item = "Action";
-            txInfos.fields[0].value = (char *) G_io_apdu_buffer + 100;
+            txInfos.fields[0].value = (const char *) G_io_apdu_buffer + 100;
             txInfos.fields[1].item = "Exchange ID";
             txInfos.fields[1].value = toAddress;
             txInfos.fields[2].item = "Token Name";
             txInfos.fields[2].value = fullContract;
             txInfos.fields[3].item = "Amount";
-            txInfos.fields[3].value = (char *) G_io_apdu_buffer;
+            txInfos.fields[3].value = (const char *) G_io_apdu_buffer;
             txInfos.fields[4].item = "From Address";
             txInfos.fields[4].value = fromAddress;
             pairList.nbPairs = 5;
@@ -236,28 +236,30 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
                 THROW(E_INCORRECT_DATA);
             }
             for (i = 0; i < votes_count; i++) {
-                txInfos.fields[i].item = (char *) (G_io_apdu_buffer + voteSlot(i, VOTE_ADDRESS));
-                txInfos.fields[i].value = (char *) (G_io_apdu_buffer + voteSlot(i, VOTE_AMOUNT));
+                txInfos.fields[i].item =
+                    ((const char *) G_io_apdu_buffer + voteSlot(i, VOTE_ADDRESS));
+                txInfos.fields[i].value =
+                    ((const char *) G_io_apdu_buffer + voteSlot(i, VOTE_AMOUNT));
             }
             txInfos.fields[votes_count].item = "Total Vote Count";
             txInfos.fields[votes_count].value = fullContract;
             txInfos.fields[votes_count + 1].item = "From Address";
             txInfos.fields[votes_count + 1].value = fromAddress;
             pairList.nbPairs = votes_count + 2;
-            txInfos.flowTitle = (char *) "Review Votes";
+            txInfos.flowTitle = "Review Votes";
             infoLongPress.text = "Approve Votes";
             break;
         case APPROVAL_FREEZEASSET_TRANSACTION:
             txInfos.fields[0].item = "Gain";
             txInfos.fields[0].value = fullContract;
             txInfos.fields[1].item = "Amount";
-            txInfos.fields[1].value = (char *) G_io_apdu_buffer;
+            txInfos.fields[1].value = (const char *) G_io_apdu_buffer;
             txInfos.fields[2].item = "Freeze To";
             txInfos.fields[2].value = toAddress;
             txInfos.fields[3].item = "From Address";
             txInfos.fields[3].value = fromAddress;
             pairList.nbPairs = 4;
-            txInfos.flowTitle = (char *) "Review Freeze";
+            txInfos.flowTitle = "Review Freeze";
             infoLongPress.text = "Confirm Freeze";
             break;
         case APPROVAL_UNFREEZEASSET_TRANSACTION:
@@ -268,14 +270,14 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
             txInfos.fields[2].item = "From Address";
             txInfos.fields[2].value = fromAddress;
             pairList.nbPairs = 3;
-            txInfos.flowTitle = (char *) "Review Unfreeze";
+            txInfos.flowTitle = "Review Unfreeze";
             infoLongPress.text = "Confirm Unfreeze";
             break;
         case APPROVAL_WITHDRAWBALANCE_TRANSACTION:
             txInfos.fields[0].item = "From Address";
             txInfos.fields[0].value = fromAddress;
             pairList.nbPairs = 1;
-            txInfos.flowSubtitle = (char *) "Claim Rewards";
+            txInfos.flowSubtitle = "Claim Rewards";
             break;
         case APPROVAL_SIGN_PERSONAL_MESSAGE:
             txInfos.confirmCb = (nbgl_callback_t) ui_callback_signMessage_ok;
@@ -284,7 +286,7 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
             txInfos.fields[1].item = "Sign with";
             txInfos.fields[1].value = fromAddress;
             pairList.nbPairs = 2;
-            txInfos.flowTitle = (char *) "Sign Message";
+            txInfos.flowTitle = "Sign Message";
             infoLongPress.text = "Confirm Sign";
             break;
         case APPROVAL_CUSTOM_CONTRACT:
@@ -296,11 +298,11 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
             txInfos.fields[2].item = "Pay Token";
             txInfos.fields[2].value = toAddress;
             txInfos.fields[3].item = "Call Amount";
-            txInfos.fields[3].value = (char *) G_io_apdu_buffer;
+            txInfos.fields[3].value = (const char *) G_io_apdu_buffer;
             txInfos.fields[4].item = "From Address";
             txInfos.fields[4].value = fromAddress;
             pairList.nbPairs = 5;
-            txInfos.flowTitle = (char *) "Review Contract";
+            txInfos.flowTitle = "Review Contract";
             break;
         case APPROVAL_SHARED_ECDH_SECRET:
             txInfos.confirmCb = (nbgl_callback_t) ui_callback_ecdh_ok;
@@ -309,76 +311,76 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
             txInfos.fields[1].item = "Shared With";
             txInfos.fields[1].value = toAddress;
             pairList.nbPairs = 2;
-            txInfos.flowTitle = (char *) "Approve";
-            txInfos.flowSubtitle = (char *) "Shared Secret";
+            txInfos.flowTitle = "Approve";
+            txInfos.flowSubtitle = "Shared Secret";
             break;
         case APPROVAL_VERIFY_ADDRESS:
             txInfos.confirmCb = (nbgl_callback_t) ui_callback_address_ok;
             txInfos.fields[0].item = "Address";
             txInfos.fields[0].value = toAddress;
             pairList.nbPairs = 1;
-            txInfos.flowTitle = (char *) "Verify Address";
+            txInfos.flowTitle = "Verify Address";
             infoLongPress.text = "Confirm Approve";
             break;
         case APPROVAL_FREEZEASSETV2_TRANSACTION:
             txInfos.fields[0].item = "Gain";
             txInfos.fields[0].value = fullContract;
             txInfos.fields[1].item = "Amount";
-            txInfos.fields[1].value = (char *) G_io_apdu_buffer;
+            txInfos.fields[1].value = (const char *) G_io_apdu_buffer;
             txInfos.fields[2].item = "To";
             txInfos.fields[2].value = toAddress;
             txInfos.fields[3].item = "From";
             txInfos.fields[3].value = fromAddress;
             pairList.nbPairs = 4;
-            txInfos.flowTitle = (char *) "Review FreezeV2";
+            txInfos.flowTitle = "Review FreezeV2";
             infoLongPress.text = "Confirm FreezeV2";
             break;
         case APPROVAL_UNFREEZEASSETV2_TRANSACTION:
             txInfos.fields[0].item = "Resource";
             txInfos.fields[0].value = fullContract;
             txInfos.fields[1].item = "Amount";
-            txInfos.fields[1].value = (char *) G_io_apdu_buffer;
+            txInfos.fields[1].value = (const char *) G_io_apdu_buffer;
             txInfos.fields[2].item = "To";
             txInfos.fields[2].value = toAddress;
             txInfos.fields[3].item = "From";
             txInfos.fields[3].value = fromAddress;
             pairList.nbPairs = 4;
-            txInfos.flowTitle = (char *) "Review UnfreezeV2";
+            txInfos.flowTitle = "Review UnfreezeV2";
             infoLongPress.text = "Confirm UnfreezeV2";
             break;
         case APPROVAL_DELEGATE_RESOURCE_TRANSACTION:
             txInfos.fields[0].item = "Resource";
             txInfos.fields[0].value = fullContract;
             txInfos.fields[1].item = "Amount";
-            txInfos.fields[1].value = (char *) G_io_apdu_buffer;
+            txInfos.fields[1].value = (const char *) G_io_apdu_buffer;
             txInfos.fields[2].item = "Lock";
-            txInfos.fields[2].value = (char *) G_io_apdu_buffer + 100;
+            txInfos.fields[2].value = (const char *) G_io_apdu_buffer + 100;
             txInfos.fields[3].item = "To";
             txInfos.fields[3].value = toAddress;
             txInfos.fields[4].item = "From";
             txInfos.fields[4].value = fromAddress;
             pairList.nbPairs = 5;
-            txInfos.flowTitle = (char *) "Delegate Resource";
+            txInfos.flowTitle = "Delegate Resource";
             infoLongPress.text = "Confirm Delegate";
             break;
         case APPROVAL_UNDELEGATE_RESOURCE_TRANSACTION:
             txInfos.fields[0].item = "Resource";
             txInfos.fields[0].value = fullContract;
             txInfos.fields[1].item = "Amount";
-            txInfos.fields[1].value = (char *) G_io_apdu_buffer;
+            txInfos.fields[1].value = (const char *) G_io_apdu_buffer;
             txInfos.fields[2].item = "To";
             txInfos.fields[2].value = fromAddress;
             txInfos.fields[3].item = "From";
             txInfos.fields[3].value = toAddress;
             pairList.nbPairs = 4;
-            txInfos.flowTitle = (char *) "Undelegate Resource";
+            txInfos.flowTitle = "Undelegate Resource";
             infoLongPress.text = "Confirm Undelegate";
             break;
         case APPROVAL_WITHDRAWEXPIREUNFREEZE_TRANSACTION:
             txInfos.fields[0].item = "FROM";
             txInfos.fields[0].value = fromAddress;
             pairList.nbPairs = 1;
-            txInfos.flowTitle = (char *) "Withdraw Unfreeze";
+            txInfos.flowTitle = "Withdraw Unfreeze";
             infoLongPress.text = "Confirm Withdraw";
             break;
         default:

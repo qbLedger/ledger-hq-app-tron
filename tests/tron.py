@@ -3,16 +3,14 @@ import sys
 import base58
 
 from enum import IntEnum
-from contextlib import contextmanager
 from pathlib import Path
-from time import sleep, time
 from typing import Tuple
 from struct import unpack
 from bip_utils import Bip39SeedGenerator, Bip32Slip10Secp256k1
 from eth_keys import keys
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import ec
-from ragger.backend.interface import BackendInterface, RAPDU
+from ragger.backend.interface import BackendInterface
 from ragger.navigator import NavInsID, NavIns
 from conftest import MNEMONIC
 
@@ -25,6 +23,8 @@ Tron Protobuf
 from core import Tron_pb2 as tron
 from google.protobuf.any_pb2 import Any
 from google.protobuf.internal.decoder import _DecodeVarint32
+
+ROOT_SCREENSHOT_PATH = Path(__file__).parent.resolve()
 
 MAX_APDU_LEN: int = 255
 
@@ -63,7 +63,7 @@ class InsType(IntEnum):
     SIGN_TXN_HASH = 0x05  #  Unsafe
     GET_APP_CONFIGURATION = 0x06  # Version and settings
     SIGN_PERSONAL_MESSAGE = 0x08
-    GET_ECDH_SECRET = 0x0Aa
+    GET_ECDH_SECRET = 0x0A
 
 
 class Errors(IntEnum):
@@ -158,16 +158,6 @@ class TronClient:
                 diffieHellman,
             }
 
-    def _exchange(self,
-                  ins: int,
-                  p1: int,
-                  p2: int,
-                  payload: bytes = b"") -> RAPDU:
-        return self._client.exchange(self.CLA, ins, p1=p1, p2=p2, data=payload)
-
-    def _exchange_raw(self, payload: bytes = b"") -> RAPDU:
-        return self._client.exchange_raw(data=payload)
-
     def address_hex(self, address):
         return base58.b58decode_check(address).hex().upper()
 
@@ -176,12 +166,6 @@ class TronClient:
         bip32_ctx = Bip32Slip10Secp256k1.FromSeedAndPath(
             seed_bytes, f"m/44'/195'/{account}'/{change}/{address_index}")
         return bytes(bip32_ctx.PrivateKey().Raw())
-
-    def apduMessage(self, INS, P1, P2, MESSAGE):
-        hexString = "{:02x}{:02x}{:02x}{:02x}{:02x}{}".format(
-            CLA, INS, P1, P2,
-            len(MESSAGE) // 2, MESSAGE)
-        return bytes.fromhex(hexString)
 
     def getAccount(self, number):
         return self.accounts[number]
@@ -213,44 +197,40 @@ class TronClient:
     def get_next_length(self, tx):
         field, pos = _DecodeVarint32(tx, 0)
         size, newpos = _DecodeVarint32(tx, pos)
-        if (field & 0x07 == 0): return newpos
+        if (field & 0x07 == 0):
+            return newpos
         return size + newpos
 
-    @contextmanager
-    def exchange_async_and_navigate(self,
-                                    pack,
-                                    snappath: Path = None,
-                                    text: str = ""):
-        with self._client.exchange_async_raw(pack):
-            if self._firmware.device == "stax":
-                sleep(1.5)
-                self._navigator.navigate_until_text_and_compare(
-                    # Use custom touch coordinates to account for warning approve
-                    # button position.
-                    NavIns(NavInsID.TOUCH, (200, 545)),
-                    [NavIns(NavInsID.USE_CASE_REVIEW_CONFIRM)],
-                    text,
-                    Path(__file__).parent.resolve(),
-                    snappath,
-                    screen_change_after_last_instruction=False)
-            else:
-                self._navigator.navigate_until_text_and_compare(
-                    NavIns(NavInsID.RIGHT_CLICK),
-                    [NavIns(NavInsID.BOTH_CLICK)],
-                    text,
-                    Path(__file__).parent.resolve(),
-                    snappath,
-                    screen_change_after_last_instruction=False)
+    def navigate(self, snappath: Path = None, text: str = ""):
+        if self._firmware.device == "stax":
+            self._navigator.navigate_until_text_and_compare(
+                # Use custom touch coordinates to account for warning approve
+                # button position.
+                NavIns(NavInsID.TOUCH, (200, 545)),
+                [
+                    NavInsID.USE_CASE_REVIEW_CONFIRM,
+                    NavInsID.USE_CASE_STATUS_DISMISS
+                ],
+                text,
+                ROOT_SCREENSHOT_PATH,
+                snappath,
+                screen_change_before_first_instruction=True)
+        else:
+            self._navigator.navigate_until_text_and_compare(
+                NavIns(NavInsID.RIGHT_CLICK), [NavIns(NavInsID.BOTH_CLICK)],
+                text,
+                ROOT_SCREENSHOT_PATH,
+                snappath,
+                screen_change_before_first_instruction=True)
 
     def getVersion(self):
-        pack = self.apduMessage(InsType.GET_APP_CONFIGURATION, 0x00, 0x00,
-                                "FF")
-        return self._exchange_raw(pack)
+        return self._client.exchange(CLA, InsType.GET_APP_CONFIGURATION, 0x00,
+                                     0x00)
 
     def getAddress(self, account_idx: int = 0):
-        pack = self.apduMessage(InsType.GET_PUBLIC_KEY, 0x00, 0x00,
-                                f"05{self.getAccount(account_idx)['path']}")
-        return self._exchange_raw(pack)
+        data = bytearray.fromhex(f"05{self.getAccount(account_idx)['path']}")
+        return self._client.exchange(CLA, InsType.GET_PUBLIC_KEY, 0x00, 0x00,
+                                     data)
 
     def unpackGetAddressResponse(self, response: bytes) -> Tuple[str, str]:
         assert (response[0] == PUBLIC_KEY_LENGTH)
@@ -266,7 +246,6 @@ class TronClient:
         major, minor, patch = unpack("BBB", response[1:])
         return major, minor, patch
 
-    @contextmanager
     def sign(self,
              path,
              tx,
@@ -274,58 +253,56 @@ class TronClient:
              snappath: Path = None,
              text: str = "",
              navigate: bool = True):
-        to_send = []
-        start_bytes = []
+        messages = []
 
+        # Split transaction in multiples APDU
         data = bytearray.fromhex(f"05{path}")
         while len(tx) > 0:
             # get next message field
             newpos = self.get_next_length(tx)
             assert (newpos < MAX_APDU_LEN)
-            if (len(data) + newpos) > MAX_APDU_LEN:
+            if (len(data) + newpos) < MAX_APDU_LEN:
+                # append to data
+                data.extend(tx[:newpos])
+                tx = tx[newpos:]
+            else:
                 # add chunk
-                to_send.append(data.hex())
+                messages.append(data)
                 data = bytearray()
                 continue
-            # append to data
-            data.extend(tx[:newpos])
-            tx = tx[newpos:]
         # append last
-        to_send.append(data.hex())
-        token_pos = len(to_send)
-        to_send.extend(signatures)
+        messages.append(data)
+        token_pos = len(messages)
 
-        if len(to_send) == 1:
-            start_bytes.append(P1.SIGN)
+        for signature in signatures:
+            messages.append(bytearray.fromhex(signature))
+
+        # Send all the messages expect the last
+        for i, data in enumerate(messages[:-1]):
+            if i == 0:
+                p1 = P1.FIRST
+            else:
+                if i < token_pos:
+                    p1 = P1.MORE
+                else:
+                    p1 = P1.TRC10_NAME | P1.FIRST | i - token_pos
+
+            self._client.exchange(CLA, InsType.SIGN, p1, 0x00, data)
+
+        # Send last message
+        if len(messages) == 1:
+            p1 = P1.SIGN
+        elif signatures:
+            p1 = P1.TRC10_NAME | InsType.SIGN_PERSONAL_MESSAGE | len(
+                signatures) - 1
         else:
-            start_bytes.append(P1.FIRST)
-            for i in range(1, len(to_send) - 1):
-                if (i >= token_pos):
-                    start_bytes.append(P1.TRC10_NAME | P1.FIRST
-                                       | i - token_pos)
-                else:
-                    start_bytes.append(P1.MORE)
+            p1 = P1.LAST
 
-            if not (signatures == None) and len(signatures) > 0:
-                start_bytes.append(P1.TRC10_NAME
-                                   | InsType.SIGN_PERSONAL_MESSAGE
-                                   | len(signatures) - 1)
-            else:
-                start_bytes.append(P1.LAST)
-
-        for i in range(len(to_send)):
-            pack = self.apduMessage(InsType.SIGN, start_bytes[i], 0x00,
-                                    to_send[i])
-            if i < len(to_send) - 1:
-
-                ret = self._exchange_raw(payload=pack)
-                if not (ret.status == Errors.OK):
-                    raise ValueError(
-                        "Something went wrong while sending the APDU.")
-
-            else:
-                if navigate:
-                    self.exchange_async_and_navigate(pack, snappath, text)
-                else:
-                    self._client.exchange_async_raw(pack)
-                sleep(0.5)
+        if navigate:
+            with self._client.exchange_async(CLA, InsType.SIGN, p1, 0x00,
+                                             messages[-1]):
+                self.navigate(snappath, text)
+            return self._client.last_async_response
+        else:
+            return self._client.exchange(CLA, InsType.SIGN, p1, 0x00,
+                                         messages[-1])
