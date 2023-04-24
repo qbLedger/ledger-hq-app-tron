@@ -18,7 +18,7 @@
 #include "helpers.h"
 #include "base58.h"
 #include "os_io_seproxyhal.h"
-#include "lib_standard_app/crypto_helpers.h"
+#include "crypto_helpers.h"
 
 void getAddressFromKey(cx_ecfp_public_key_t *publicKey, uint8_t *address) {
     return getAddressFromPublicKey(publicKey->W, address);
@@ -47,7 +47,7 @@ void getBase58FromAddress(uint8_t *address, uint8_t *out, cx_sha256_t *sha2, boo
     memmove(addchecksum, address, ADDRESS_SIZE);
     memmove(addchecksum + ADDRESS_SIZE, sha256, 4);
 
-    encode_base_58(&addchecksum[0], 25, (char *) out, BASE58CHECK_ADDRESS_SIZE);
+    base58_encode(&addchecksum[0], 25, (char *) out, BASE58CHECK_ADDRESS_SIZE);
     out[BASE58CHECK_ADDRESS_SIZE] = '\0';
     if (truncate) {
         memmove((void *) out + 5, "...", 3);
