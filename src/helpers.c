@@ -15,10 +15,12 @@
  *  limitations under the License.
  ********************************************************************************/
 
-#include "helpers.h"
 #include "base58.h"
-#include "os_io_seproxyhal.h"
+#include "io.h"
 #include "crypto_helpers.h"
+
+#include "helpers.h"
+#include "app_errors.h"
 
 void getAddressFromKey(cx_ecfp_public_key_t *publicKey, uint8_t *address) {
     return getAddressFromPublicKey(publicKey->W, address);
@@ -97,7 +99,7 @@ void array_hexstr(char *strbuf, const void *bin, unsigned int len) {
     *strbuf = 0;  // EOS
 }
 
-uint32_t set_result_get_publicKey(const publicKeyContext_t *pub_key_ctx) {
+int helper_send_response_pubkey(const publicKeyContext_t *pub_key_ctx) {
     uint32_t tx = 0;
     uint32_t addressLength = BASE58CHECK_ADDRESS_SIZE;
     G_io_apdu_buffer[tx++] = 65;
@@ -110,5 +112,5 @@ uint32_t set_result_get_publicKey(const publicKeyContext_t *pub_key_ctx) {
         memcpy(G_io_apdu_buffer + tx, pub_key_ctx->chainCode, 32);
         tx += 32;
     }
-    return tx;
+    return io_send_response_pointer(G_io_apdu_buffer, tx, E_OK);
 }
