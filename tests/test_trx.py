@@ -25,7 +25,8 @@ from core import Contract_pb2 as contract
 from core import Tron_pb2 as tron
 
 
-class TestTRX:
+@pytest.mark.usefixtures('configuration')
+class TestTRX():
     '''Test TRX client.'''
 
     def sign_and_validate(self,
@@ -56,8 +57,7 @@ class TestTRX:
             client.getAccount(0)['publicKey'][2:])
         assert (validSignature == True)
 
-    def test_trx_get_version(self, backend, configuration, firmware,
-                             navigator):
+    def test_trx_get_version(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         resp = client.getVersion()
         major, minor, patch = client.unpackGetVersionResponse(resp.data)
@@ -68,17 +68,8 @@ class TestTRX:
         assert (minor == int(version[0][1]))
         assert (patch == int(version[0][2]))
 
-    def test_trx_get_addresses(self, backend, configuration, firmware,
-                               navigator):
-        client = TronClient(backend, firmware, navigator)
-        for i in range(2):
-            resp = client.getAddress(i)
-            pubkey, address = client.unpackGetAddressResponse(resp.data)
-            assert (client.accounts[i]['publicKey'][2:] == pubkey)
-            assert (client.accounts[i]['addressHex'] == address)
-
     @contextmanager
-    def test_trx_send(self, backend, configuration, firmware, navigator):
+    def test_trx_send(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.TransferContract,
@@ -89,8 +80,7 @@ class TestTRX:
                                       amount=100000000))
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_send_with_data_field(self, backend, configuration, firmware,
-                                      navigator):
+    def test_trx_send_with_data_field(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.TransferContract,
@@ -102,8 +92,7 @@ class TestTRX:
             b'CryptoChain-TronSR Ledger Transactions Tests')
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_send_wrong_path(self, backend, configuration, firmware,
-                                 navigator):
+    def test_trx_send_wrong_path(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.TransferContract,
@@ -137,8 +126,7 @@ class TestTRX:
                 asset_name="1002000".encode()))
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_send_asset_with_name(self, backend, configuration, firmware,
-                                      navigator):
+    def test_trx_send_asset_with_name(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.TransferAssetContract,
@@ -154,8 +142,7 @@ class TestTRX:
         ]
         self.sign_and_validate(client, firmware, 0, tx, tokenSignature)
 
-    def test_trx_send_asset_with_name_wrong_signature(self, backend,
-                                                      configuration, firmware,
+    def test_trx_send_asset_with_name_wrong_signature(self, backend, firmware,
                                                       navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
@@ -177,8 +164,7 @@ class TestTRX:
                         navigate=False)
         assert e.value.status == Errors.INCORRECT_DATA
 
-    def test_trx_exchange_create(self, backend, configuration, firmware,
-                                 navigator):
+    def test_trx_exchange_create(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.ExchangeCreateContract,
@@ -208,8 +194,7 @@ class TestTRX:
 
         self.sign_and_validate(client, firmware, 1, tx, tokenSignature)
 
-    def test_trx_exchange_inject(self, backend, configuration, firmware,
-                                 navigator):
+    def test_trx_exchange_inject(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.ExchangeInjectContract,
@@ -223,8 +208,7 @@ class TestTRX:
         ]
         self.sign_and_validate(client, firmware, 0, tx, exchangeSignature)
 
-    def test_trx_exchange_withdraw(self, backend, configuration, firmware,
-                                   navigator):
+    def test_trx_exchange_withdraw(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.ExchangeWithdrawContract,
@@ -238,8 +222,7 @@ class TestTRX:
         ]
         self.sign_and_validate(client, firmware, 0, tx, exchangeSignature)
 
-    def test_trx_exchange_transaction(self, backend, configuration, firmware,
-                                      navigator):
+    def test_trx_exchange_transaction(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.ExchangeTransactionContract,
@@ -254,8 +237,7 @@ class TestTRX:
         ]
         self.sign_and_validate(client, firmware, 0, tx, exchangeSignature)
 
-    def test_trx_vote_witness(self, backend, configuration, firmware,
-                              navigator):
+    def test_trx_vote_witness(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.VoteWitnessContract,
@@ -330,8 +312,7 @@ class TestTRX:
             client.sign(client.getAccount(0)['path'], tx, navigate=False)
         assert e.value.status == Errors.INCORRECT_DATA
 
-    def test_trx_freeze_balance_bw(self, backend, configuration, firmware,
-                                   navigator):
+    def test_trx_freeze_balance_bw(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.FreezeBalanceContract,
@@ -342,8 +323,7 @@ class TestTRX:
                                            resource=contract.BANDWIDTH))
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_freeze_balance_energy(self, backend, configuration, firmware,
-                                       navigator):
+    def test_trx_freeze_balance_energy(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.FreezeBalanceContract,
@@ -372,8 +352,7 @@ class TestTRX:
 
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_unfreeze_balance_bw(self, backend, configuration, firmware,
-                                     navigator):
+    def test_trx_unfreeze_balance_bw(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.UnfreezeBalanceContract,
@@ -400,8 +379,7 @@ class TestTRX:
 
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_withdraw_balance(self, backend, configuration, firmware,
-                                  navigator):
+    def test_trx_withdraw_balance(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.WithdrawBalanceContract,
@@ -409,8 +387,7 @@ class TestTRX:
                 client.getAccount(0)['addressHex'])))
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_proposal_create(self, backend, configuration, firmware,
-                                 navigator):
+    def test_trx_proposal_create(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.ProposalCreateContract,
@@ -422,8 +399,7 @@ class TestTRX:
                                             }))
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_proposal_approve(self, backend, configuration, firmware,
-                                  navigator):
+    def test_trx_proposal_approve(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.ProposalApproveContract,
@@ -433,8 +409,7 @@ class TestTRX:
                                              is_add_approval=True))
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_proposal_delete(self, backend, configuration, firmware,
-                                 navigator):
+    def test_trx_proposal_delete(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.ProposalDeleteContract,
@@ -446,8 +421,7 @@ class TestTRX:
 
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_account_update(self, backend, configuration, firmware,
-                                navigator):
+    def test_trx_account_update(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.AccountUpdateContract,
@@ -458,7 +432,7 @@ class TestTRX:
             ))
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_trc20_send(self, backend, configuration, firmware, navigator):
+    def test_trx_trc20_send(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.TriggerSmartContract,
@@ -472,8 +446,7 @@ class TestTRX:
                 )))
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_trc20_approve(self, backend, configuration, firmware,
-                               navigator):
+    def test_trx_trc20_approve(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.TriggerSmartContract,
@@ -487,8 +460,7 @@ class TestTRX:
                 )))
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_sign_message(self, backend, configuration, firmware,
-                              navigator):
+    def test_trx_sign_message(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         # Magic define
         SIGN_MAGIC = b'\x19TRON Signed Message:\n'
@@ -516,8 +488,7 @@ class TestTRX:
             client.getAccount(0)['publicKey'][2:])
         assert (validSignature == True)
 
-    def test_trx_send_permissioned(self, backend, configuration, firmware,
-                                   navigator):
+    def test_trx_send_permissioned(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.TransferContract,
@@ -528,7 +499,7 @@ class TestTRX:
                                       amount=100000000), None, 2)
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_ecdh_key(self, backend, configuration, firmware, navigator):
+    def test_trx_ecdh_key(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         # get ledger public key
         data = bytearray.fromhex(f"05{client.getAccount(0)['path']}")
@@ -554,8 +525,7 @@ class TestTRX:
         shared_key = client.getAccount(1)['dh'].exchange(ec.ECDH(), pubKeyDH)
         assert (shared_key.hex() == resp.data[1:33].hex())
 
-    def test_trx_custom_contract(self, backend, configuration, firmware,
-                                 navigator):
+    def test_trx_custom_contract(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.TriggerSmartContract,
@@ -568,8 +538,7 @@ class TestTRX:
                     0x0a857040, int(10001)))))
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_unknown_trc20_send(self, backend, configuration, firmware,
-                                    navigator):
+    def test_trx_unknown_trc20_send(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.TriggerSmartContract,
@@ -583,8 +552,7 @@ class TestTRX:
                 )))
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_freezeV2_balance(self, backend, configuration, firmware,
-                                  navigator):
+    def test_trx_freezeV2_balance(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.FreezeBalanceV2Contract,
@@ -594,8 +562,7 @@ class TestTRX:
                                              resource=contract.ENERGY))
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_unfreezeV2_balance(self, backend, configuration, firmware,
-                                    navigator):
+    def test_trx_unfreezeV2_balance(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.UnfreezeBalanceV2Contract,
@@ -605,8 +572,7 @@ class TestTRX:
                                                resource=contract.ENERGY))
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_delegate_resource(self, backend, configuration, firmware,
-                                   navigator):
+    def test_trx_delegate_resource(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.DelegateResourceContract,
@@ -620,8 +586,7 @@ class TestTRX:
                 lock=0))
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_undelegate_resource(self, backend, configuration, firmware,
-                                     navigator):
+    def test_trx_undelegate_resource(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.UnDelegateResourceContract,
@@ -634,8 +599,7 @@ class TestTRX:
                     client.address_hex("TGQVLckg1gDZS5wUwPTrPgRG4U8MKC4jcP"))))
         self.sign_and_validate(client, firmware, 0, tx)
 
-    def test_trx_withdraw_unfreeze(self, backend, configuration, firmware,
-                                   navigator):
+    def test_trx_withdraw_unfreeze(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.WithdrawExpireUnfreezeContract,

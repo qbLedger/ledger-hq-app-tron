@@ -9,11 +9,11 @@ from ragger.navigator import NavInsID, NavIns
 ###########################
 MNEMONIC = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 
-configuration.OPTIONAL.BACKEND_SCOPE = "session"
+configuration.OPTIONAL.BACKEND_SCOPE = "class"
 configuration.OPTIONAL.CUSTOM_SEED = MNEMONIC
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="class")
 def configuration(backend: BackendInterface, navigator, firmware):
     if type(backend) is SpeculosBackend:
         if firmware.device == "stax":
