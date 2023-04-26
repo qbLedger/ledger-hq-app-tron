@@ -22,10 +22,6 @@
 #include "helpers.h"
 #include "app_errors.h"
 
-void getAddressFromKey(cx_ecfp_public_key_t *publicKey, uint8_t *address) {
-    return getAddressFromPublicKey(publicKey->W, address);
-}
-
 void getAddressFromPublicKey(const uint8_t *publicKey, uint8_t *address) {
     uint8_t hashAddress[32];
     cx_sha3_t sha3;
@@ -64,28 +60,32 @@ void transactionHash(uint8_t *raw, uint16_t dataLength, uint8_t *out, cx_sha256_
     cx_hash((cx_hash_t *) sha2, CX_LAST, raw, dataLength, out, 32);
 }
 
-void signTransaction(transactionContext_t *transactionContext) {
+int signTransaction(transactionContext_t *transactionContext) {
+    cx_err_t err;
     unsigned int info = 0;
 
     // Get Private key from BIP32 path
     io_seproxyhal_io_heartbeat();
-    bip32_derive_ecdsa_sign_rs_hash_256(CX_CURVE_256K1,
-                                        transactionContext->bip32_path.indices,
-                                        transactionContext->bip32_path.length,
-                                        CX_RND_RFC6979 | CX_LAST,
-                                        CX_SHA256,
-                                        transactionContext->hash,
-                                        sizeof(transactionContext->hash),
-                                        transactionContext->signature,
-                                        transactionContext->signature + 32,
-                                        &info);
+    err = bip32_derive_ecdsa_sign_rs_hash_256(CX_CURVE_256K1,
+                                              transactionContext->bip32_path.indices,
+                                              transactionContext->bip32_path.length,
+                                              CX_RND_RFC6979 | CX_LAST,
+                                              CX_SHA256,
+                                              transactionContext->hash,
+                                              sizeof(transactionContext->hash),
+                                              transactionContext->signature,
+                                              transactionContext->signature + 32,
+                                              &info);
+    if (err != CX_OK) {
+        return -1;
+    }
     transactionContext->signature[64] = 0x00;
     if (info & CX_ECCINFO_PARITY_ODD) {
         transactionContext->signature[64] |= 0x01;
     }
     transactionContext->signatureLength = 65;
 
-    return;
+    return 0;
 }
 const unsigned char hex_digits[] =
     {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
@@ -103,7 +103,7 @@ int helper_send_response_pubkey(const publicKeyContext_t *pub_key_ctx) {
     uint32_t tx = 0;
     uint32_t addressLength = BASE58CHECK_ADDRESS_SIZE;
     G_io_apdu_buffer[tx++] = 65;
-    memcpy(G_io_apdu_buffer + tx, pub_key_ctx->publicKey.W, 65);
+    memcpy(G_io_apdu_buffer + tx, pub_key_ctx->publicKey, 65);
     tx += 65;
     G_io_apdu_buffer[tx++] = addressLength;
     memcpy(G_io_apdu_buffer + tx, pub_key_ctx->address58, addressLength);
