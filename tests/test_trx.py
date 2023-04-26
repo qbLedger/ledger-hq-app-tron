@@ -488,6 +488,28 @@ class TestTRX():
             client.getAccount(0)['publicKey'][2:])
         assert (validSignature == True)
 
+    def test_trx_sign_hash(self, backend, firmware, navigator):
+        client = TronClient(backend, firmware, navigator)
+        hash_to_sign = bytes.fromhex("000102030405060708090a0b0c0d0e0f"
+                                     "101112131415161718191a1b1c1d1e1f")
+        data = bytearray.fromhex(f"05{client.getAccount(0)['path']}")
+        data += hash_to_sign
+
+        with backend.exchange_async(CLA, InsType.SIGN_TXN_HASH, 0x00, 0x00,
+                                    data):
+            if firmware.device == "stax":
+                text = "Hold to confirm"
+            else:
+                text = "Sign"
+            client.navigate(Path(currentframe().f_code.co_name), text)
+
+        resp = backend.last_async_response
+
+        validSignature = validateSignature.validateHASH(
+            hash_to_sign, resp.data[0:65],
+            client.getAccount(0)['publicKey'][2:])
+        assert (validSignature == True)
+
     def test_trx_send_permissioned(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
