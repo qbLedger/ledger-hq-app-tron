@@ -314,14 +314,6 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
             txInfos.flowTitle = "Approve";
             txInfos.flowSubtitle = "Shared Secret";
             break;
-        case APPROVAL_VERIFY_ADDRESS:
-            txInfos.confirmCb = (nbgl_callback_t) ui_callback_address_ok;
-            txInfos.fields[0].item = "Address";
-            txInfos.fields[0].value = toAddress;
-            pairList.nbPairs = 1;
-            txInfos.flowTitle = "Verify Address";
-            infoLongPress.text = "Confirm Approve";
-            break;
         case APPROVAL_FREEZEASSETV2_TRANSACTION:
             txInfos.fields[0].item = "Gain";
             txInfos.fields[0].value = fullContract;
@@ -389,10 +381,38 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
     }
 }
 
+static void address_verification_cancelled(void) {
+    ui_callback_tx_cancel();
+    nbgl_useCaseStatus("Address verification\ncancelled", false, ui_idle);
+}
+
+static void display_address_callback(bool confirm) {
+    if (confirm) {
+        ui_callback_address_ok();
+        nbgl_useCaseStatus("ADDRESS\nVERIFIED", true, ui_idle);
+    } else {
+        address_verification_cancelled();
+    }
+}
+
+// called when tapping on review start page to actually display address
+static void display_addr(void) {
+    nbgl_useCaseAddressConfirmation(toAddress, &display_address_callback);
+}
+
 void ux_flow_display(ui_approval_state_t state, bool data_warning) {
-    // Prepare transaction infos to be displayed (field values etc.)
-    prepareTxInfos(state, data_warning);
-    // Display transaction
-    reviewStart();
+    if (state == APPROVAL_VERIFY_ADDRESS) {
+        nbgl_useCaseReviewStart(&C_stax_app_tron_64px,
+                                "Verify TRX\naddress",
+                                NULL,
+                                "Cancel",
+                                display_addr,
+                                address_verification_cancelled);
+    } else {
+        // Prepare transaction infos to be displayed (field values etc.)
+        prepareTxInfos(state, data_warning);
+        // Display transaction
+        reviewStart();
+    }
 }
 #endif  // HAVE_NBGL

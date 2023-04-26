@@ -2,16 +2,19 @@
 import sys
 import base58
 
+from contextlib import contextmanager
 from enum import IntEnum
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Generator
 from struct import unpack
 from bip_utils import Bip39SeedGenerator, Bip32Slip10Secp256k1
+from bip_utils.addr import TrxAddrEncoder
 from eth_keys import keys
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import ec
-from ragger.backend.interface import BackendInterface
+from ragger.backend.interface import BackendInterface, RAPDU
 from ragger.navigator import NavInsID, NavIns
+from ragger.bip import pack_derivation_path
 from conftest import MNEMONIC
 
 sys.path.append(f"{Path(__file__).parent.parent.resolve()}/examples")
@@ -227,18 +230,60 @@ class TronClient:
         return self._client.exchange(CLA, InsType.GET_APP_CONFIGURATION, 0x00,
                                      0x00)
 
-    def getAddress(self, account_idx: int = 0):
-        data = bytearray.fromhex(f"05{self.getAccount(account_idx)['path']}")
-        return self._client.exchange(CLA, InsType.GET_PUBLIC_KEY, 0x00, 0x00,
-                                     data)
+    def get_async_response(self) -> RAPDU:
+        return self._client.last_async_response
 
-    def unpackGetAddressResponse(self, response: bytes) -> Tuple[str, str]:
-        assert (response[0] == PUBLIC_KEY_LENGTH)
-        assert (response[66] == BASE58_ADDRESS_SIZE)
-        assert (len(response) == GET_ADDRESS_RESP_LEN)
-        pubkey = response[2:66].hex().upper()
-        address = self.address_hex(response[67:101].decode())
-        return pubkey, address
+    def compute_address_from_public_key(self, public_key: bytes) -> str:
+        return TrxAddrEncoder.EncodeKey(public_key)
+
+    def parse_get_public_key_response(
+            self, response: bytes,
+            request_chaincode: bool) -> (bytes, str, bytes):
+        # response = public_key_len (1) ||
+        #            public_key (var) ||
+        #            address_len (1) ||
+        #            address (var) ||
+        #            chain_code (32)
+        offset: int = 0
+
+        public_key_len: int = response[offset]
+        offset += 1
+        public_key: bytes = response[offset:offset + public_key_len]
+        offset += public_key_len
+        address_len: int = response[offset]
+        offset += 1
+        address: str = response[offset:offset + address_len].decode("ascii")
+        offset += address_len
+        if request_chaincode:
+            chaincode: bytes = response[offset:offset + 32]
+            offset += 32
+        else:
+            chaincode = None
+
+        assert len(response) == offset
+        assert len(public_key) == 65
+        assert self.compute_address_from_public_key(public_key) == address
+
+        return public_key, address, chaincode
+
+    def send_get_public_key_non_confirm(self, derivation_path: str,
+                                        request_chaincode: bool) -> RAPDU:
+        p1 = P1.NON_CONFIRM
+        p2 = P2.CHAINCODE if request_chaincode else P2.NO_CHAINCODE
+        payload = pack_derivation_path(derivation_path)
+        return self._client.exchange(CLA, InsType.GET_PUBLIC_KEY, p1, p2,
+                                     payload)
+
+    @contextmanager
+    def send_async_get_public_key_confirm(
+            self, derivation_path: str,
+            request_chaincode: bool) -> Generator[None, None, None]:
+        p1 = P1.CONFIRM
+        p2 = P2.CHAINCODE if request_chaincode else P2.NO_CHAINCODE
+        payload = pack_derivation_path(derivation_path)
+        with self._client.exchange_async(CLA, InsType.GET_PUBLIC_KEY, p1, p2,
+                                         payload):
+            yield
 
     def unpackGetVersionResponse(self,
                                  response: bytes) -> Tuple[int, int, int]:
