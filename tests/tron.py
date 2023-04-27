@@ -32,9 +32,6 @@ ROOT_SCREENSHOT_PATH = Path(__file__).parent.resolve()
 MAX_APDU_LEN: int = 255
 
 CLA: int = 0xE0
-# Samsung Wallet ID specific CLA and INS
-COMMON_CLA: int = 0xB0
-COMMON_INS_GET_WALLET_ID: int = 0x04
 
 PUBLIC_KEY_LENGTH = 65
 BASE58_ADDRESS_SIZE = 34

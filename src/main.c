@@ -60,9 +60,6 @@ unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 #define P2_NO_CHAINCODE 0x00
 #define P2_CHAINCODE    0x01
 
-#define COMMON_CLA               0xB0
-#define COMMON_INS_GET_WALLET_ID 0x04
-
 #define OFFSET_CLA   0
 #define OFFSET_INS   1
 #define OFFSET_P1    2
@@ -146,32 +143,6 @@ off_t read_bip32_path(const uint8_t *buffer, size_t length, bip32_path_t *path) 
     }
     return 1 + 4 * path_length;
 }
-
-#ifndef HAVE_WALLET_ID_SDK
-
-unsigned int const U_os_perso_seed_cookie[] = {
-    0xda7aba5e,
-    0xc1a551c5,
-};
-
-void handleGetWalletId(volatile unsigned int *tx) {
-    unsigned char t[64];
-    cx_ecfp_256_private_key_t priv;
-    cx_ecfp_256_public_key_t pub;
-    // seed => priv key
-    os_perso_derive_node_bip32(CX_CURVE_256K1, U_os_perso_seed_cookie, 2, t, NULL);
-    // priv key => pubkey
-    cx_ecdsa_init_private_key(CX_CURVE_256K1, t, 32, &priv);
-    cx_ecfp_generate_pair(CX_CURVE_256K1, &pub, &priv, 1);
-    // pubkey -> sha512
-    cx_hash_sha512(pub.W, sizeof(pub.W), t, sizeof(t));
-    // ! cookie !
-    memcpy(G_io_apdu_buffer, t, 64);
-    *tx = 64;
-    THROW(E_OK);
-}
-
-#endif
 
 void initPublicKeyContext(bip32_path_t *bip32_path) {
     uint8_t privateKeyData[33];
@@ -956,16 +927,6 @@ void handleApdu(volatile unsigned int *flags, volatile unsigned int *tx) {
 
     BEGIN_TRY {
         TRY {
-#ifndef HAVE_WALLET_ID_SDK
-
-            if ((G_io_apdu_buffer[OFFSET_CLA] == COMMON_CLA) &&
-                (G_io_apdu_buffer[OFFSET_INS] == COMMON_INS_GET_WALLET_ID)) {
-                handleGetWalletId(tx);
-                return;
-            }
-
-#endif
-
             if (G_io_apdu_buffer[OFFSET_CLA] != CLA) {
                 THROW(E_CLA_NOT_SUPPORTED);
             }

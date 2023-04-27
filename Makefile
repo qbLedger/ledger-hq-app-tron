@@ -50,8 +50,6 @@ include $(BOLOS_SDK)/Makefile.defines
 
 APPNAME = Tron
 APP_LOAD_PARAMS=--appFlags 0x240 --path "44'/195'" --curve secp256k1 $(COMMON_LOAD_PARAMS) 
-# Samsung temporary implementation for wallet ID on 0xda7aba5e/0xc1a551c5
-APP_LOAD_PARAMS += --path "1517992542'/1101353413'"
 
 splitVersion=$(word $2, $(subst ., , $1))
 
@@ -134,7 +132,7 @@ include $(BOLOS_SDK)/Makefile.glyphs
 
 ### computed variables
 APP_SOURCE_PATH  += src
-SDK_SOURCE_PATH  += lib_u2f lib_stusb_impl lib_stusb
+SDK_SOURCE_PATH  += lib_stusb_impl lib_stusb
 
 ifneq ($(TARGET_NAME),TARGET_STAX)
 SDK_SOURCE_PATH += lib_ux
@@ -145,16 +143,6 @@ SDK_SOURCE_PATH  += lib_blewbxx lib_blewbxx_impl
 else ifeq ($(TARGET_NAME),TARGET_STAX)
 SDK_SOURCE_PATH  += lib_blewbxx lib_blewbxx_impl
 endif
-
-# If the SDK supports Flow for Nano S, build for it
-ifeq ($(TARGET_NAME),TARGET_NANOS)
-DEFINES += HAVE_WALLET_ID_SDK
-endif
-
-# U2F
-DEFINES   += U2F_PROXY_MAGIC=\"TRX\"
-DEFINES   += HAVE_IO_U2F HAVE_U2F
-DEFINES   += U2F_REQUEST_TIMEOUT=28000 # 28 seconds
 
 proto:
 	$(MAKE) -C $@
