@@ -73,22 +73,24 @@ class TestTRX():
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.TransferContract,
-            contract.TransferContract(owner_address=bytes.fromhex(
-                client.getAccount(0)['addressHex']),
-                                      to_address=bytes.fromhex(
-                                          client.getAccount(0)['addressHex']),
-                                      amount=100000000))
+            contract.TransferContract(
+                owner_address=bytes.fromhex(
+                    client.getAccount(0)['addressHex']),
+                to_address=bytes.fromhex(
+                    client.address_hex("TBoTZcARzWVgnNuB9SyE3S5g1RwsXoQL16")),
+                amount=100000000))
         self.sign_and_validate(client, firmware, 0, tx)
 
     def test_trx_send_with_data_field(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.TransferContract,
-            contract.TransferContract(owner_address=bytes.fromhex(
-                client.getAccount(0)['addressHex']),
-                                      to_address=bytes.fromhex(
-                                          client.getAccount(0)['addressHex']),
-                                      amount=100000000),
+            contract.TransferContract(
+                owner_address=bytes.fromhex(
+                    client.getAccount(0)['addressHex']),
+                to_address=bytes.fromhex(
+                    client.address_hex("TBoTZcARzWVgnNuB9SyE3S5g1RwsXoQL16")),
+                amount=100000000),
             b'CryptoChain-TronSR Ledger Transactions Tests')
         self.sign_and_validate(client, firmware, 0, tx)
 
@@ -96,11 +98,12 @@ class TestTRX():
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.TransferContract,
-            contract.TransferContract(owner_address=bytes.fromhex(
-                client.getAccount(0)['addressHex']),
-                                      to_address=bytes.fromhex(
-                                          client.getAccount(0)['addressHex']),
-                                      amount=100000000))
+            contract.TransferContract(
+                owner_address=bytes.fromhex(
+                    client.getAccount(0)['addressHex']),
+                to_address=bytes.fromhex(
+                    client.address_hex("TBoTZcARzWVgnNuB9SyE3S5g1RwsXoQL16")),
+                amount=100000000))
         texts = {"sta": "Hold to confirm", "nan": "Sign"}
         text = texts[firmware.device[:3]]
         path = Path(currentframe().f_code.co_name)
@@ -121,7 +124,8 @@ class TestTRX():
             contract.TransferAssetContract(
                 owner_address=bytes.fromhex(
                     client.getAccount(0)['addressHex']),
-                to_address=bytes.fromhex(client.getAccount(0)['addressHex']),
+                to_address=bytes.fromhex(
+                    client.address_hex("TBoTZcARzWVgnNuB9SyE3S5g1RwsXoQL16")),
                 amount=1000000,
                 asset_name="1002000".encode()))
         self.sign_and_validate(client, firmware, 0, tx)
@@ -133,7 +137,8 @@ class TestTRX():
             contract.TransferAssetContract(
                 owner_address=bytes.fromhex(
                     client.getAccount(0)['addressHex']),
-                to_address=bytes.fromhex(client.getAccount(0)['addressHex']),
+                to_address=bytes.fromhex(
+                    client.address_hex("TBoTZcARzWVgnNuB9SyE3S5g1RwsXoQL16")),
                 amount=1000000,
                 asset_name="1002000".encode()))
         # BTT token ID 1002000 - 6 decimals
@@ -150,7 +155,8 @@ class TestTRX():
             contract.TransferAssetContract(
                 owner_address=bytes.fromhex(
                     client.getAccount(0)['addressHex']),
-                to_address=bytes.fromhex(client.getAccount(0)['addressHex']),
+                to_address=bytes.fromhex(
+                    client.address_hex("TBoTZcARzWVgnNuB9SyE3S5g1RwsXoQL16")),
                 amount=1000000,
                 asset_name="1002000".encode()))
         # BTT token ID 1002000 - 6 decimals
@@ -514,11 +520,12 @@ class TestTRX():
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.TransferContract,
-            contract.TransferContract(owner_address=bytes.fromhex(
-                client.getAccount(0)['addressHex']),
-                                      to_address=bytes.fromhex(
-                                          client.getAccount(0)['addressHex']),
-                                      amount=100000000), None, 2)
+            contract.TransferContract(
+                owner_address=bytes.fromhex(
+                    client.getAccount(0)['addressHex']),
+                to_address=bytes.fromhex(
+                    client.address_hex("TBoTZcARzWVgnNuB9SyE3S5g1RwsXoQL16")),
+                amount=100000000), None, 2)
         self.sign_and_validate(client, firmware, 0, tx)
 
     def test_trx_ecdh_key(self, backend, firmware, navigator):
