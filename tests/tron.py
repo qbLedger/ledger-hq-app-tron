@@ -18,11 +18,11 @@ from ragger.bip import pack_derivation_path
 from conftest import MNEMONIC
 
 sys.path.append(f"{Path(__file__).parent.parent.resolve()}/examples")
-sys.path.append(f"{Path(__file__).parent.parent.resolve()}/examples/proto")
 from base import parse_bip32_path
 '''
 Tron Protobuf
 '''
+sys.path.append(f"{Path(__file__).parent.parent.resolve()}/proto")
 from core import Tron_pb2 as tron
 from google.protobuf.any_pb2 import Any
 from google.protobuf.internal.decoder import _DecodeVarint32

@@ -144,10 +144,12 @@ else ifeq ($(TARGET_NAME),TARGET_STAX)
 SDK_SOURCE_PATH  += lib_blewbxx lib_blewbxx_impl
 endif
 
-proto:
-	$(MAKE) -C $@
-
 .PHONY: proto
+proto:
+	$(MAKE) -C proto
+
+cleanall : clean
+	$(MAKE) -C proto clean
 
 # nanopb
 #include nanopb/extra/nanopb.mk
@@ -157,14 +159,6 @@ CFLAGS += "-I$(NANOPB_DIR)" -Iproto
 DEFINES   += PB_NO_ERRMSG=1
 SOURCE_FILES += $(NANOPB_DIR)/pb_encode.c $(NANOPB_DIR)/pb_decode.c $(NANOPB_DIR)/pb_common.c
 APP_SOURCE_PATH += proto
-
-# target to also clean generated proto c files
-.SILENT : cleanall
-cleanall : clean
-	-@rm -rf \
-		proto/core/*.pb.c proto/core/*.pb.h \
-		proto/google/protobuf/*.pb.c proto/google/protobuf/*.pb.h \
-		proto/misc/*.pb.c proto/misc/*.pb.h
 
 load: all
 	python -m ledgerblue.loadApp $(APP_LOAD_PARAMS)

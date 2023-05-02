@@ -15,12 +15,12 @@ from inspect import currentframe
 from tron import TronClient, Errors, CLA, InsType
 
 sys.path.append(f"{Path(__file__).parent.parent.resolve()}/examples")
-sys.path.append(f"{Path(__file__).parent.parent.resolve()}/examples/proto")
 from base import parse_bip32_path
 import validateSignature
 '''
 Tron Protobuf
 '''
+sys.path.append(f"{Path(__file__).parent.parent.resolve()}/proto")
 from core import Contract_pb2 as contract
 from core import Tron_pb2 as tron
 
