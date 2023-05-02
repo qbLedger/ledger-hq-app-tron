@@ -13,14 +13,12 @@ from Crypto.Hash import keccak
 from cryptography.hazmat.primitives.asymmetric import ec
 from inspect import currentframe
 from tron import TronClient, Errors, CLA, InsType
-
-sys.path.append(f"{Path(__file__).parent.parent.resolve()}/examples")
-sys.path.append(f"{Path(__file__).parent.parent.resolve()}/examples/proto")
-from base import parse_bip32_path
-import validateSignature
+from ragger.bip import pack_derivation_path
+from utils import check_tx_signature, check_hash_signature
 '''
 Tron Protobuf
 '''
+sys.path.append(f"{Path(__file__).parent.parent.resolve()}/proto")
 from core import Contract_pb2 as contract
 from core import Tron_pb2 as tron
 
@@ -51,11 +49,8 @@ class TestTRX():
                            signatures=signatures,
                            snappath=path,
                            text=text)
-        assert (resp.status == Errors.OK)
-        validSignature, txID = validateSignature.validate(
-            tx, resp.data[0:65],
-            client.getAccount(0)['publicKey'][2:])
-        assert (validSignature == True)
+        assert check_tx_signature(tx, resp.data[0:65],
+                                  client.getAccount(0)['publicKey'][2:])
 
     def test_trx_get_version(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
@@ -73,22 +68,24 @@ class TestTRX():
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.TransferContract,
-            contract.TransferContract(owner_address=bytes.fromhex(
-                client.getAccount(0)['addressHex']),
-                                      to_address=bytes.fromhex(
-                                          client.getAccount(0)['addressHex']),
-                                      amount=100000000))
+            contract.TransferContract(
+                owner_address=bytes.fromhex(
+                    client.getAccount(0)['addressHex']),
+                to_address=bytes.fromhex(
+                    client.address_hex("TBoTZcARzWVgnNuB9SyE3S5g1RwsXoQL16")),
+                amount=100000000))
         self.sign_and_validate(client, firmware, 0, tx)
 
     def test_trx_send_with_data_field(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.TransferContract,
-            contract.TransferContract(owner_address=bytes.fromhex(
-                client.getAccount(0)['addressHex']),
-                                      to_address=bytes.fromhex(
-                                          client.getAccount(0)['addressHex']),
-                                      amount=100000000),
+            contract.TransferContract(
+                owner_address=bytes.fromhex(
+                    client.getAccount(0)['addressHex']),
+                to_address=bytes.fromhex(
+                    client.address_hex("TBoTZcARzWVgnNuB9SyE3S5g1RwsXoQL16")),
+                amount=100000000),
             b'CryptoChain-TronSR Ledger Transactions Tests')
         self.sign_and_validate(client, firmware, 0, tx)
 
@@ -96,22 +93,18 @@ class TestTRX():
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.TransferContract,
-            contract.TransferContract(owner_address=bytes.fromhex(
-                client.getAccount(0)['addressHex']),
-                                      to_address=bytes.fromhex(
-                                          client.getAccount(0)['addressHex']),
-                                      amount=100000000))
+            contract.TransferContract(
+                owner_address=bytes.fromhex(
+                    client.getAccount(0)['addressHex']),
+                to_address=bytes.fromhex(
+                    client.address_hex("TBoTZcARzWVgnNuB9SyE3S5g1RwsXoQL16")),
+                amount=100000000))
         texts = {"sta": "Hold to confirm", "nan": "Sign"}
         text = texts[firmware.device[:3]]
         path = Path(currentframe().f_code.co_name)
-        resp = client.sign(parse_bip32_path("44'/195'/1'/1/0"),
-                           tx,
-                           snappath=path,
-                           text=text)
-        validSignature, txID = validateSignature.validate(
-            tx, resp.data[0:65],
-            client.getAccount(0)['publicKey'][2:])
-        assert validSignature is False
+        resp = client.sign("m/44'/195'/1'/1/0", tx, snappath=path, text=text)
+        assert not check_tx_signature(tx, resp.data[0:65],
+                                      client.getAccount(0)['publicKey'][2:])
 
     def test_trx_send_asset_without_name(self, backend, configuration,
                                          firmware, navigator):
@@ -121,7 +114,8 @@ class TestTRX():
             contract.TransferAssetContract(
                 owner_address=bytes.fromhex(
                     client.getAccount(0)['addressHex']),
-                to_address=bytes.fromhex(client.getAccount(0)['addressHex']),
+                to_address=bytes.fromhex(
+                    client.address_hex("TBoTZcARzWVgnNuB9SyE3S5g1RwsXoQL16")),
                 amount=1000000,
                 asset_name="1002000".encode()))
         self.sign_and_validate(client, firmware, 0, tx)
@@ -133,7 +127,8 @@ class TestTRX():
             contract.TransferAssetContract(
                 owner_address=bytes.fromhex(
                     client.getAccount(0)['addressHex']),
-                to_address=bytes.fromhex(client.getAccount(0)['addressHex']),
+                to_address=bytes.fromhex(
+                    client.address_hex("TBoTZcARzWVgnNuB9SyE3S5g1RwsXoQL16")),
                 amount=1000000,
                 asset_name="1002000".encode()))
         # BTT token ID 1002000 - 6 decimals
@@ -150,7 +145,8 @@ class TestTRX():
             contract.TransferAssetContract(
                 owner_address=bytes.fromhex(
                     client.getAccount(0)['addressHex']),
-                to_address=bytes.fromhex(client.getAccount(0)['addressHex']),
+                to_address=bytes.fromhex(
+                    client.address_hex("TBoTZcARzWVgnNuB9SyE3S5g1RwsXoQL16")),
                 amount=1000000,
                 asset_name="1002000".encode()))
         # BTT token ID 1002000 - 6 decimals
@@ -465,7 +461,7 @@ class TestTRX():
         # Magic define
         SIGN_MAGIC = b'\x19TRON Signed Message:\n'
         message = 'CryptoChain-TronSR Ledger Transactions Tests'.encode()
-        data = bytearray.fromhex(f"05{client.getAccount(0)['path']}")
+        data = pack_derivation_path(client.getAccount(0)['path'])
         data += struct.pack(">I", len(message)) + message
 
         with backend.exchange_async(CLA, InsType.SIGN_PERSONAL_MESSAGE, 0x00,
@@ -481,18 +477,16 @@ class TestTRX():
         signedMessage = SIGN_MAGIC + str(len(message)).encode() + message
         keccak_hash = keccak.new(digest_bits=256)
         keccak_hash.update(signedMessage)
-        hash = keccak_hash.digest()
+        hash_to_sign = keccak_hash.digest()
 
-        validSignature = validateSignature.validateHASH(
-            hash, resp.data[0:65],
-            client.getAccount(0)['publicKey'][2:])
-        assert (validSignature == True)
+        assert check_hash_signature(hash_to_sign, resp.data[0:65],
+                                    client.getAccount(0)['publicKey'][2:])
 
     def test_trx_sign_hash(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         hash_to_sign = bytes.fromhex("000102030405060708090a0b0c0d0e0f"
                                      "101112131415161718191a1b1c1d1e1f")
-        data = bytearray.fromhex(f"05{client.getAccount(0)['path']}")
+        data = pack_derivation_path(client.getAccount(0)['path'])
         data += hash_to_sign
 
         with backend.exchange_async(CLA, InsType.SIGN_TXN_HASH, 0x00, 0x00,
@@ -505,32 +499,31 @@ class TestTRX():
 
         resp = backend.last_async_response
 
-        validSignature = validateSignature.validateHASH(
-            hash_to_sign, resp.data[0:65],
-            client.getAccount(0)['publicKey'][2:])
-        assert (validSignature == True)
+        assert check_hash_signature(hash_to_sign, resp.data[0:65],
+                                    client.getAccount(0)['publicKey'][2:])
 
     def test_trx_send_permissioned(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         tx = client.packContract(
             tron.Transaction.Contract.TransferContract,
-            contract.TransferContract(owner_address=bytes.fromhex(
-                client.getAccount(0)['addressHex']),
-                                      to_address=bytes.fromhex(
-                                          client.getAccount(0)['addressHex']),
-                                      amount=100000000), None, 2)
+            contract.TransferContract(
+                owner_address=bytes.fromhex(
+                    client.getAccount(0)['addressHex']),
+                to_address=bytes.fromhex(
+                    client.address_hex("TBoTZcARzWVgnNuB9SyE3S5g1RwsXoQL16")),
+                amount=100000000), None, 2)
         self.sign_and_validate(client, firmware, 0, tx)
 
     def test_trx_ecdh_key(self, backend, firmware, navigator):
         client = TronClient(backend, firmware, navigator)
         # get ledger public key
-        data = bytearray.fromhex(f"05{client.getAccount(0)['path']}")
+        data = pack_derivation_path(client.getAccount(0)['path'])
         resp = backend.exchange(CLA, InsType.GET_PUBLIC_KEY, 0x00, 0x00, data)
         assert (resp.data[0] == 65)
         pubKey = bytes(resp.data[1:66])
 
         # get pair key
-        data = bytearray.fromhex(f"05{client.getAccount(0)['path']}")
+        data = pack_derivation_path(client.getAccount(0)['path'])
         data += bytearray.fromhex(f"04{client.getAccount(1)['publicKey'][2:]}")
         with backend.exchange_async(CLA, InsType.GET_ECDH_SECRET, 0x00, 0x01,
                                     data):

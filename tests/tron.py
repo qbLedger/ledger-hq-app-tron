@@ -16,13 +16,10 @@ from ragger.backend.interface import BackendInterface, RAPDU
 from ragger.navigator import NavInsID, NavIns
 from ragger.bip import pack_derivation_path
 from conftest import MNEMONIC
-
-sys.path.append(f"{Path(__file__).parent.parent.resolve()}/examples")
-sys.path.append(f"{Path(__file__).parent.parent.resolve()}/examples/proto")
-from base import parse_bip32_path
 '''
 Tron Protobuf
 '''
+sys.path.append(f"{Path(__file__).parent.parent.resolve()}/proto")
 from core import Tron_pb2 as tron
 from google.protobuf.any_pb2 import Any
 from google.protobuf.internal.decoder import _DecodeVarint32
@@ -144,8 +141,7 @@ class TronClient:
                                                   ec.SECP256K1(),
                                                   default_backend())
             self.accounts[i] = {
-                "path":
-                parse_bip32_path("44'/195'/{}'/0/0".format(i)),
+                "path": ("m/44'/195'/{}'/0/0".format(i)),
                 "privateKeyHex":
                 HD.hex(),
                 "key":
@@ -289,7 +285,7 @@ class TronClient:
         return major, minor, patch
 
     def sign(self,
-             path,
+             path: str,
              tx,
              signatures=[],
              snappath: Path = None,
@@ -298,14 +294,14 @@ class TronClient:
         messages = []
 
         # Split transaction in multiples APDU
-        data = bytearray.fromhex(f"05{path}")
+        data = pack_derivation_path(path)
         while len(tx) > 0:
             # get next message field
             newpos = self.get_next_length(tx)
             assert (newpos < MAX_APDU_LEN)
             if (len(data) + newpos) < MAX_APDU_LEN:
                 # append to data
-                data.extend(tx[:newpos])
+                data += tx[:newpos]
                 tx = tx[newpos:]
             else:
                 # add chunk
