@@ -25,7 +25,7 @@ def configuration(backend: BackendInterface, navigator, firmware):
                 # Allow custom contracts
                 NavIns(NavInsID.TOUCH, (30, 250)),
                 # Allow sign by hash
-                NavIns(NavInsID.TOUCH, (30, 350)),
+                NavIns(NavInsID.TOUCH, (30, 390)),
                 # Go back to main menu.
                 NavIns(NavInsID.TOUCH, (40, 40))
             ]

@@ -29,9 +29,9 @@ enum {
     SWITCH_ALLOW_HASH_TX_TOKEN
 };
 
-#define NB_INFO_FIELDS 2
-static const char* const infoTypes[] = {"Version", "Tron App"};
-static const char* const infoContents[] = {APPVERSION, "(c) 2022 Ledger"};
+#define NB_INFO_FIELDS 3
+static const char* const infoTypes[] = {"Version", "Developer", "Copyright"};
+static const char* const infoContents[] = {APPVERSION, "Klever", "(c) 2022 Ledger"};
 
 #define NB_SETTINGS_SWITCHES 3
 #define SETTING_IDX(token)   (token - SWITCH_ALLOW_TX_DATA_TOKEN)
@@ -49,7 +49,7 @@ void onQuitCallback(void) {
 static bool settingsNavCallback(uint8_t page, nbgl_pageContent_t* content) {
     if (page == 0) {
         switches[0].text = "Transactions data";
-        switches[0].subText = "Allow extra data in transactions";
+        switches[0].subText = "Allow extra data in\ntransactions";
         switches[0].token = SWITCH_ALLOW_TX_DATA_TOKEN;
         switches[0].tuneId = TUNE_TAP_CASUAL;
         switches[0].initState = (HAS_SETTING(S_DATA_ALLOWED)) ? ON_STATE : OFF_STATE;
@@ -58,8 +58,8 @@ static bool settingsNavCallback(uint8_t page, nbgl_pageContent_t* content) {
         switches[1].token = SWITCH_ALLOW_CSTM_CONTRACTS_TOKEN;
         switches[1].tuneId = TUNE_TAP_CASUAL;
         switches[1].initState = (HAS_SETTING(S_CUSTOM_CONTRACT)) ? ON_STATE : OFF_STATE;
-        switches[2].text = "Sign by Hash";
-        switches[2].subText = "Allow hash-only transactions";
+        switches[2].text = "Blind signing";
+        switches[2].subText = "Allow transaction blind signing";
         switches[2].token = SWITCH_ALLOW_HASH_TX_TOKEN;
         switches[2].tuneId = TUNE_TAP_CASUAL;
         switches[2].initState = (HAS_SETTING(S_SIGN_BY_HASH)) ? ON_STATE : OFF_STATE;
