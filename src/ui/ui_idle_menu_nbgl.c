@@ -31,7 +31,7 @@ enum {
 
 #define NB_INFO_FIELDS 3
 static const char* const infoTypes[] = {"Version", "Developer", "Copyright"};
-static const char* const infoContents[] = {APPVERSION, "Klever", "(c) 2022 Ledger"};
+static const char* const infoContents[] = {APPVERSION, "Klever", "(c) 2023 Ledger"};
 
 #define NB_SETTINGS_SWITCHES 3
 #define SETTING_IDX(token)   (token - SWITCH_ALLOW_TX_DATA_TOKEN)
@@ -104,7 +104,7 @@ static void displaySettingsMenu(void) {
 void ui_idle(void) {
     nbgl_useCaseHome("Tron",
                      &C_stax_app_tron_64px,
-                     "This app confirms actions on\nthe Tron network.",
+                     NULL,
                      true,
                      displaySettingsMenu,
                      onQuitCallback);
