@@ -231,11 +231,10 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
             pairList.nbPairs = 5;
             break;
         case APPROVAL_WITNESSVOTE_TRANSACTION:
-            uint8_t i;
             if (votes_count > MAX_TX_FIELDS - 2) {
                 THROW(E_INCORRECT_DATA);
             }
-            for (i = 0; i < votes_count; i++) {
+            for (uint8_t i = 0; i < votes_count; i++) {
                 txInfos.fields[i].item =
                     ((const char *) G_io_apdu_buffer + voteSlot(i, VOTE_ADDRESS));
                 txInfos.fields[i].value =
