@@ -1567,7 +1567,6 @@ int verifyTokenNameID(const char *tokenId,
                       uint8_t *signature,
                       uint8_t signatureLength) {
     uint8_t buffer[65];
-    cx_sha256_t sha2;
     uint8_t hash[32];
     cx_ecfp_public_key_t publicKey;
 
@@ -1575,17 +1574,14 @@ int verifyTokenNameID(const char *tokenId,
 
     snprintf((char *) buffer, sizeof(buffer), "%s%s%c", tokenId, tokenName, decimals);
 
-    cx_sha256_init(&sha2);  // init sha
-    cx_hash((cx_hash_t *) &sha2,
-            CX_LAST,
-            buffer,
-            strlen(tokenId) + strlen(tokenName) + 1,
-            hash,
-            32);
+    cx_hash_sha256(buffer, strlen(tokenId) + strlen(tokenName) + 1, hash, 32);
 
-    cx_ecfp_init_public_key(CX_CURVE_256K1, (uint8_t *) PIC(&token_public_key), 65, &publicKey);
+    cx_ecfp_init_public_key_no_throw(CX_CURVE_256K1,
+                                     (uint8_t *) PIC(&token_public_key),
+                                     65,
+                                     &publicKey);
 
-    int ret = cx_ecdsa_verify(&publicKey, CX_LAST, CX_SHA256, hash, 32, signature, signatureLength);
+    int ret = cx_ecdsa_verify_no_throw(&publicKey, hash, 32, signature, signatureLength);
 
     return ret;
 }
@@ -1594,16 +1590,17 @@ int verifyExchangeID(const unsigned char *exchangeValidation,
                      uint8_t datLength,
                      uint8_t *signature,
                      uint8_t signatureLength) {
-    cx_sha256_t sha2;
     uint8_t hash[32];
     cx_ecfp_public_key_t publicKey;
 
-    cx_sha256_init(&sha2);  // init sha
-    cx_hash((cx_hash_t *) &sha2, CX_LAST, exchangeValidation, datLength, hash, 32);
+    cx_hash_sha256(exchangeValidation, datLength, hash, 32);
 
-    cx_ecfp_init_public_key(CX_CURVE_256K1, (uint8_t *) PIC(&token_public_key), 65, &publicKey);
+    cx_ecfp_init_public_key_no_throw(CX_CURVE_256K1,
+                                     (uint8_t *) PIC(&token_public_key),
+                                     65,
+                                     &publicKey);
 
-    int ret = cx_ecdsa_verify(&publicKey, CX_LAST, CX_SHA256, hash, 32, signature, signatureLength);
+    int ret = cx_ecdsa_verify_no_throw(&publicKey, hash, 32, signature, signatureLength);
 
     return ret;
 }
