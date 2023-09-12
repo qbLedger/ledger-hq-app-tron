@@ -168,7 +168,6 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
 
     switch (state) {
         case APPROVAL_TRANSFER:
-            PRINTF("TITI\n");
             txInfos.fields[0].item = stringLabelTxAmount;
             txInfos.fields[0].value = (const char *) G_io_apdu_buffer;
             txInfos.fields[1].item = "Token";
@@ -177,8 +176,8 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
             txInfos.fields[2].value = toAddress;
             txInfos.fields[3].item = stringLabelSenderAddress;
             txInfos.fields[3].value = fromAddress;
-            txInfos.flowTitle = "Review Transaction to\nsend token";
-            infoLongPress.text = "Sign Transaction to\nsend token";
+            txInfos.flowTitle = "Review Transaction";
+            infoLongPress.text = "Sign Transaction";
             pairList.nbPairs = 4;
             break;
         case APPROVAL_SIMPLE_TRANSACTION:
