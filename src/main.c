@@ -354,7 +354,7 @@ void handleSign(uint8_t p1,
         case TRANSFERASSETCONTRACT:  // TRC10 Transfer
         case TRIGGERSMARTCONTRACT:   // TRC20 Transfer
 
-            strcpy(TRC20ActionSendAllow, "Send To");
+            strcpy(TRC20ActionSendAllow, "To");
             if (txContent.contractType == TRIGGERSMARTCONTRACT) {
                 if (txContent.TRC20Method == 1)
                     strcpy(TRC20Action, "Asset");

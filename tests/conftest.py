@@ -19,15 +19,16 @@ def configuration(backend: BackendInterface, navigator, firmware):
         if firmware.device == "stax":
             instructions = [
                 # Go to settings menu.
-                NavIns(NavInsID.TOUCH, (300, 30)),
+                NavIns(NavInsID.USE_CASE_HOME_SETTINGS),
+                NavIns(NavInsID.USE_CASE_SETTINGS_NEXT),
                 # Allow data in TXs
-                NavIns(NavInsID.TOUCH, (30, 100)),
+                NavIns(NavInsID.TOUCH, (200, 150)),
                 # Allow custom contracts
-                NavIns(NavInsID.TOUCH, (30, 250)),
+                NavIns(NavInsID.TOUCH, (200, 300)),
                 # Allow sign by hash
-                NavIns(NavInsID.TOUCH, (30, 350)),
+                NavIns(NavInsID.TOUCH, (200, 450)),
                 # Go back to main menu.
-                NavIns(NavInsID.TOUCH, (40, 40))
+                NavIns(NavInsID.USE_CASE_SETTINGS_MULTI_PAGE_EXIT),
             ]
         else:
             instructions = [
