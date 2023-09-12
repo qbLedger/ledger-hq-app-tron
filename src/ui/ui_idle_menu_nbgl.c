@@ -50,8 +50,8 @@ static bool settingsNavCallback(uint8_t page, nbgl_pageContent_t* content) {
     if (page == 0) {
         content->type = INFOS_LIST;
         content->infosList.nbInfos = NB_INFO_FIELDS;
-        content->infosList.infoTypes = (const char**) infoTypes;
-        content->infosList.infoContents = (const char**) infoContents;
+        content->infosList.infoTypes = infoTypes;
+        content->infosList.infoContents = infoContents;
     } else if (page == 1) {
         switches[0].text = "Transactions data";
         switches[0].subText = "Allow extra data in\ntransactions";
