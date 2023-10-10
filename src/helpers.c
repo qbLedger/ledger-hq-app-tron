@@ -18,6 +18,7 @@
 #include "helpers.h"
 #include "base58.h"
 #include "os_io_seproxyhal.h"
+#include "lib_standard_app/crypto_helpers.h"
 
 void getAddressFromKey(cx_ecfp_public_key_t *publicKey, uint8_t *address) {
     return getAddressFromPublicKey(publicKey->W, address);
@@ -62,41 +63,20 @@ void transactionHash(uint8_t *raw, uint16_t dataLength, uint8_t *out, cx_sha256_
 }
 
 void signTransaction(transactionContext_t *transactionContext) {
-    uint8_t privateKeyData[32];
-    cx_ecfp_private_key_t privateKey;
-    uint8_t rLength, sLength, rOffset, sOffset;
-    uint8_t signature[100];
     unsigned int info = 0;
 
     // Get Private key from BIP32 path
     io_seproxyhal_io_heartbeat();
-    os_perso_derive_node_bip32(CX_CURVE_256K1,
-                               transactionContext->bip32_path.indices,
-                               transactionContext->bip32_path.length,
-                               privateKeyData,
-                               NULL);
-    cx_ecfp_init_private_key(CX_CURVE_256K1, privateKeyData, 32, &privateKey);
-    explicit_bzero(privateKeyData, sizeof(privateKeyData));
-    // Sign transaction hash
-    io_seproxyhal_io_heartbeat();
-    cx_ecdsa_sign(&privateKey,
-                  CX_RND_RFC6979 | CX_LAST,
-                  CX_SHA256,
-                  transactionContext->hash,
-                  sizeof(transactionContext->hash),
-                  signature,
-                  sizeof(signature),
-                  &info);
-
-    io_seproxyhal_io_heartbeat();
-    explicit_bzero(&privateKey, sizeof(privateKey));
-    // recover signature
-    rLength = signature[3];
-    sLength = signature[4 + rLength + 1];
-    rOffset = (rLength == 33 ? 1 : 0);
-    sOffset = (sLength == 33 ? 1 : 0);
-    memcpy(transactionContext->signature, signature + 4 + rOffset, 32);
-    memcpy(transactionContext->signature + 32, signature + 4 + rLength + 2 + sOffset, 32);
+    bip32_derive_ecdsa_sign_rs_hash_256(CX_CURVE_256K1,
+                                        transactionContext->bip32_path.indices,
+                                        transactionContext->bip32_path.length,
+                                        CX_RND_RFC6979 | CX_LAST,
+                                        CX_SHA256,
+                                        transactionContext->hash,
+                                        sizeof(transactionContext->hash),
+                                        transactionContext->signature,
+                                        transactionContext->signature + 32,
+                                        &info);
     transactionContext->signature[64] = 0x00;
     if (info & CX_ECCINFO_PARITY_ODD) {
         transactionContext->signature[64] |= 0x01;
