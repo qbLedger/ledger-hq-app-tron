@@ -20,6 +20,8 @@
 #include "cx.h"
 #include "io.h"
 
+#include "format.h"
+
 #include "helpers.h"
 #include "ui_review_menu.h"
 #include "app_errors.h"
@@ -52,11 +54,11 @@ int handleSignPersonalMessage(uint8_t p1, uint8_t p2, uint8_t *workBuffer, uint1
                          (const uint8_t *) SIGN_MAGIC,
                          sizeof(SIGN_MAGIC) - 1,
                          NULL,
-                         32);
+                         0);
 
         char tmp[11];
         snprintf((char *) tmp, 11, "%d", (uint32_t) txContent.dataBytes);
-        cx_hash_no_throw((cx_hash_t *) &sha3, 0, (const uint8_t *) tmp, strlen(tmp), NULL, 32);
+        cx_hash_no_throw((cx_hash_t *) &sha3, 0, (const uint8_t *) tmp, strlen(tmp), NULL, 0);
 
     } else if (p1 != P1_MORE) {
         return io_send_sw(E_INCORRECT_P1_P2);
@@ -69,23 +71,25 @@ int handleSignPersonalMessage(uint8_t p1, uint8_t p2, uint8_t *workBuffer, uint1
         return io_send_sw(E_INCORRECT_LENGTH);
     }
 
-    cx_hash_no_throw((cx_hash_t *) &sha3, 0, workBuffer, dataLength, NULL, 32);
+    cx_hash_no_throw((cx_hash_t *) &sha3, 0, workBuffer, dataLength, NULL, 0);
     txContent.dataBytes -= dataLength;
     if (txContent.dataBytes == 0) {
         cx_hash_no_throw((cx_hash_t *) &sha3, CX_LAST, workBuffer, 0, transactionContext.hash, 32);
 #ifdef HAVE_BAGL
 #define HASH_LENGTH 4
-        array_hexstr((char *) fullContract, transactionContext.hash, HASH_LENGTH / 2);
-        fullContract[HASH_LENGTH / 2 * 2] = '.';
-        fullContract[HASH_LENGTH / 2 * 2 + 1] = '.';
-        fullContract[HASH_LENGTH / 2 * 2 + 2] = '.';
-        array_hexstr((char *) fullContract + HASH_LENGTH / 2 * 2 + 3,
-                     transactionContext.hash + 32 - HASH_LENGTH / 2,
-                     HASH_LENGTH / 2);
+        format_hex(transactionContext.hash, HASH_LENGTH / 2, fullContract, sizeof(fullContract));
+        fullContract[HASH_LENGTH] = '.';
+        fullContract[HASH_LENGTH + 1] = '.';
+        fullContract[HASH_LENGTH + 2] = '.';
+        format_hex(transactionContext.hash + 32 - HASH_LENGTH / 2,
+                   HASH_LENGTH / 2,
+                   fullContract + HASH_LENGTH + 3,
+                   sizeof(fullContract) - (HASH_LENGTH + 3));
 #else
-        array_hexstr((char *) fullContract,
-                     transactionContext.hash,
-                     sizeof(transactionContext.hash));
+        format_hex(transactionContext.hash,
+                   sizeof(transactionContext.hash),
+                   fullContract,
+                   sizeof(fullContract));
 #endif
         if (initPublicKeyContext(&transactionContext.bip32_path, fromAddress) != 0) {
             return io_send_sw(E_SECURITY_STATUS_NOT_SATISFIED);

@@ -129,15 +129,22 @@ static void reviewStart() {
 }
 
 static void reviewChoice(bool confirm) {
+    bool ret;
+
     if (confirm) {
         if (txInfos.state == APPROVAL_SIGN_PERSONAL_MESSAGE) {
-            ui_callback_signMessage_ok(false);
+            ret = ui_callback_signMessage_ok(false);
         } else if (txInfos.state == APPROVAL_SHARED_ECDH_SECRET) {
-            ui_callback_ecdh_ok(false);
+            ret = ui_callback_ecdh_ok(false);
         } else {
-            ui_callback_tx_ok(false);
+            ret = ui_callback_tx_ok(false);
         }
-        nbgl_useCaseStatus("TRANSACTION\nSIGNED", true, ui_idle);
+
+        if (ret) {
+            nbgl_useCaseStatus("TRANSACTION\nSIGNED", true, ui_idle);
+        } else {
+            nbgl_useCaseStatus("Transaction failure", false, ui_idle);
+        }
     } else {
         rejectChoice();
     }

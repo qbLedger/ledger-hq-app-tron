@@ -25,15 +25,15 @@
 #include "parse.h"
 #include "helpers.h"
 
-static int derive_public_key(const uint8_t *buffer,
-                             uint16_t buffer_length,
-                             uint8_t public_key[static PUBLIC_KEY_SIZE],
-                             char address58[static BASE58CHECK_ADDRESS_SIZE + 1]) {
+static bool derive_public_key(const uint8_t *buffer,
+                              uint16_t buffer_length,
+                              char address58[static BASE58CHECK_ADDRESS_SIZE + 1]) {
     bip32_path_t bip32_path;
+    uint8_t public_key[PUBLIC_KEY_SIZE];
 
     if (read_bip32_path(buffer, buffer_length, &bip32_path) < 0) {
         PRINTF("read_bip32_path failed\n");
-        return -1;
+        return false;
     }
 
     if (bip32_derive_get_pubkey_256(CX_CURVE_256K1,
@@ -43,13 +43,13 @@ static int derive_public_key(const uint8_t *buffer,
                                     NULL,
                                     CX_SHA512) != CX_OK) {
         PRINTF("bip32_derive_get_pubkey_256 failed\n");
-        return -1;
+        return false;
     }
 
     // Get base58 address from public key
     getBase58FromPublicKey(public_key, address58, false);
 
-    return 0;
+    return true;
 }
 
 /* Set params.result to 0 on error, 1 otherwise */
@@ -76,17 +76,13 @@ void swap_handle_check_address(check_address_parameters_t *params) {
         return;
     }
 
-    uint8_t public_key[PUBLIC_KEY_SIZE];
     char address58[BASE58CHECK_ADDRESS_SIZE + 1];
-    if (derive_public_key(params->address_parameters,
-                          params->address_parameters_length,
-                          public_key,
-                          address58) != 0) {
+    if (!derive_public_key(params->address_parameters,
+                           params->address_parameters_length,
+                           address58)) {
         PRINTF("Failed to derive public key\n");
         return;
     }
-    // Only address58 is useful in this context
-    UNUSED(public_key);
 
     if (strcmp(params->address_to_check, address58) != 0) {
         PRINTF("Address %s != %s\n", params->address_to_check, address58);

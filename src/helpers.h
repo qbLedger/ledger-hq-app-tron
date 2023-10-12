@@ -31,8 +31,6 @@ void getBase58FromPublicKey(const uint8_t *publicKey, char *address58, bool trun
 
 int signTransaction(transactionContext_t *transactionContext);
 
-void array_hexstr(char *strbuf, const void *bin, unsigned int len);
-
 int helper_send_response_pubkey(const publicKeyContext_t *pub_key_ctx);
 
 off_t read_bip32_path(const uint8_t *buffer, size_t length, bip32_path_t *path);

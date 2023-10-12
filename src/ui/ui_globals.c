@@ -35,7 +35,7 @@ int8_t votes_count;
 transactionContext_t transactionContext;
 publicKeyContext_t publicKeyContext;
 
-unsigned int ui_callback_address_ok(bool display_menu) {
+bool ui_callback_address_ok(bool display_menu) {
     helper_send_response_pubkey(&publicKeyContext);
 
     if (display_menu) {
@@ -43,12 +43,15 @@ unsigned int ui_callback_address_ok(bool display_menu) {
         ui_idle();
     }
 
-    return 0;  // do not redraw the widget
+    return true;
 }
 
-unsigned int ui_callback_signMessage_ok(bool display_menu) {
+bool ui_callback_signMessage_ok(bool display_menu) {
+    bool ret = true;
+
     if (signTransaction(&transactionContext) != 0) {
         io_send_sw(E_SECURITY_STATUS_NOT_SATISFIED);
+        ret = false;
     } else {
         io_send_response_pointer(transactionContext.signature,
                                  transactionContext.signatureLength,
@@ -60,10 +63,10 @@ unsigned int ui_callback_signMessage_ok(bool display_menu) {
         ui_idle();
     }
 
-    return 0;  // do not redraw the widget
+    return ret;
 }
 
-unsigned int ui_callback_tx_cancel(bool display_menu) {
+bool ui_callback_tx_cancel(bool display_menu) {
     io_send_sw(E_CONDITIONS_OF_USE_NOT_SATISFIED);
 
     if (display_menu) {
@@ -71,12 +74,15 @@ unsigned int ui_callback_tx_cancel(bool display_menu) {
         ui_idle();
     }
 
-    return 0;  // do not redraw the widget
+    return true;
 }
 
-unsigned int ui_callback_tx_ok(bool display_menu) {
+bool ui_callback_tx_ok(bool display_menu) {
+    bool ret = true;
+
     if (signTransaction(&transactionContext) != 0) {
         io_send_sw(E_SECURITY_STATUS_NOT_SATISFIED);
+        ret = false;
     } else {
         io_send_response_pointer(transactionContext.signature,
                                  transactionContext.signatureLength,
@@ -88,10 +94,10 @@ unsigned int ui_callback_tx_ok(bool display_menu) {
         ui_idle();
     }
 
-    return 0;  // do not redraw the widget
+    return ret;
 }
 
-unsigned int ui_callback_ecdh_ok(bool display_menu) {
+bool ui_callback_ecdh_ok(bool display_menu) {
     cx_err_t err;
     cx_ecfp_private_key_t privateKey;
     uint32_t tx = 0;
@@ -135,5 +141,9 @@ end:
         ui_idle();
     }
 
-    return 0;  // do not redraw the widget
+    if (err == CX_OK) {
+        return true;
+    } else {
+        return false;
+    }
 }

@@ -48,6 +48,16 @@ bool swap_copy_transaction_parameters(create_transaction_parameters_t* params) {
         return false;
     }
 
+    if (params->destination_address == NULL) {
+        PRINTF("Destination address expected\n");
+        return false;
+    }
+
+    if (params->amount == NULL) {
+        PRINTF("Amount expected\n");
+        return false;
+    }
+
     // first copy parameters to stack, and then to global data.
     // We need this "trick" as the input data position can overlap with app globals
     // and also because we want to memset the whole bss segment as it is not done
@@ -97,7 +107,6 @@ bool swap_copy_transaction_parameters(create_transaction_parameters_t* params) {
 
     // Commit from stack to global data, params becomes tainted but we won't access it anymore
     memcpy(&G_swap_validated, &swap_validated, sizeof(swap_validated));
-    swap_validated.initialized = true;
     return true;
 }
 
@@ -123,7 +132,6 @@ static bool check_swap_amount(const char* amount) {
 
 bool swap_check_validity(const char* amount,
                          const char* tokenName,
-                         const char* fromAdress,
                          const char* action,
                          const char* toAddress) {
     PRINTF("Inside Tron swap_check_validity\n");
@@ -140,9 +148,6 @@ bool swap_check_validity(const char* amount,
         PRINTF("Refused field '%s', expecting '%s'\n", tokenName, G_swap_validated.ticker);
         return false;
     }
-
-    // No check done on fromAdress field.
-    UNUSED(fromAdress);
 
     if (strcmp(action, "To") != 0) {
         PRINTF("Refused field '%s', expecting 'To'\n", action);

@@ -19,6 +19,8 @@
 
 #include "io.h"
 
+#include "format.h"
+
 #include "helpers.h"
 #include "handlers.h"
 #include "ui_review_menu.h"
@@ -169,11 +171,9 @@ int handleSign(uint8_t p1, uint8_t p2, uint8_t *workBuffer, uint16_t dataLength)
 #ifdef HAVE_SWAP
             if (G_called_from_swap) {
                 return io_send_sw(E_SWAP_CHECKING_FAIL);
-            } else
-#endif
-            {
-                return io_send_sw(E_MISSING_SETTING_DATA_ALLOWED);
             }
+#endif
+            return io_send_sw(E_MISSING_SETTING_DATA_ALLOWED);
         default:
             PRINTF("Unexpected parser status\n");
             return io_send_sw(txResult);
@@ -302,8 +302,7 @@ int handleSign(uint8_t p1, uint8_t p2, uint8_t *workBuffer, uint16_t dataLength)
             if (G_called_from_swap) {
                 if (swap_check_validity((char *) G_io_apdu_buffer,  // Amount
                                         fullContract,               // Token name
-                                        fromAddress,
-                                        TRC20ActionSendAllow,  // "Send To"
+                                        TRC20ActionSendAllow,       // "Send To"
                                         toAddress)) {
                     PRINTF("Signing valid swap transaction\n");
                     ui_callback_tx_ok(false);
@@ -521,7 +520,7 @@ int handleSign(uint8_t p1, uint8_t p2, uint8_t *workBuffer, uint16_t dataLength)
                 return io_send_sw(E_MISSING_SETTING_SIGN_BY_HASH);  // reject
             }
             // Write fullHash
-            array_hexstr((char *) fullHash, transactionContext.hash, 32);
+            format_hex(transactionContext.hash, 32, fullHash, sizeof(fullHash));
             // write contract type
             if (!setContractType(txContent.contractType, fullContract, sizeof(fullContract))) {
                 return io_send_sw(E_INCORRECT_DATA);
@@ -538,7 +537,7 @@ int handleSign(uint8_t p1, uint8_t p2, uint8_t *workBuffer, uint16_t dataLength)
                 return io_send_sw(E_MISSING_SETTING_SIGN_BY_HASH);  // reject
             }
             // Write fullHash
-            array_hexstr((char *) fullHash, transactionContext.hash, 32);
+            format_hex(transactionContext.hash, 32, fullHash, sizeof(fullHash));
             // write contract type
             if (!setContractType(txContent.contractType, fullContract, sizeof(fullContract))) {
                 return io_send_sw(E_INCORRECT_DATA);

@@ -97,27 +97,16 @@ int signTransaction(transactionContext_t *transactionContext) {
 
     return 0;
 }
-const unsigned char hex_digits[] =
-    {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
-
-void array_hexstr(char *strbuf, const void *bin, unsigned int len) {
-    while (len--) {
-        *strbuf++ = hex_digits[((*((char *) bin)) >> 4) & 0xF];
-        *strbuf++ = hex_digits[(*((char *) bin)) & 0xF];
-        bin = (const void *) ((unsigned int) bin + 1);
-    }
-    *strbuf = 0;  // EOS
-}
 
 int helper_send_response_pubkey(const publicKeyContext_t *pub_key_ctx) {
     uint32_t tx = 0;
-    uint32_t addressLength = BASE58CHECK_ADDRESS_SIZE;
+
     G_io_apdu_buffer[tx++] = PUBLIC_KEY_SIZE;
     memcpy(G_io_apdu_buffer + tx, pub_key_ctx->publicKey, PUBLIC_KEY_SIZE);
     tx += PUBLIC_KEY_SIZE;
-    G_io_apdu_buffer[tx++] = addressLength;
-    memcpy(G_io_apdu_buffer + tx, pub_key_ctx->address58, addressLength);
-    tx += addressLength;
+    G_io_apdu_buffer[tx++] = BASE58CHECK_ADDRESS_SIZE;
+    memcpy(G_io_apdu_buffer + tx, pub_key_ctx->address58, BASE58CHECK_ADDRESS_SIZE);
+    tx += BASE58CHECK_ADDRESS_SIZE;
     if (pub_key_ctx->getChaincode) {
         memcpy(G_io_apdu_buffer + tx, pub_key_ctx->chainCode, CHAIN_CODE_SIZE);
         tx += CHAIN_CODE_SIZE;

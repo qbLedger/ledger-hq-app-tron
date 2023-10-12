@@ -40,15 +40,15 @@ int handleECDHSecret(uint8_t p1, uint8_t p2, uint8_t *workBuffer, uint16_t dataL
         return io_send_sw(E_INCORRECT_LENGTH);
     }
 
-    // Load raw Data
-    memcpy(transactionContext.signature, workBuffer, PUBLIC_KEY_SIZE);
-
     if (initPublicKeyContext(&transactionContext.bip32_path, fromAddress) != 0) {
         return io_send_sw(E_SECURITY_STATUS_NOT_SATISFIED);
     }
 
+    // Load raw Data
+    memcpy(transactionContext.signature, workBuffer, PUBLIC_KEY_SIZE);
+
     // Get base58 address from workBuffer public key
-    getBase58FromPublicKey(workBuffer, toAddress, false);
+    getBase58FromPublicKey(transactionContext.signature, toAddress, false);
 
     ux_flow_display(APPROVAL_SHARED_ECDH_SECRET, false);
 

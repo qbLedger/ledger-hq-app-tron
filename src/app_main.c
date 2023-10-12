@@ -106,6 +106,7 @@ void app_main(void) {
                 }
             }
             CATCH(EXCEPTION_IO_RESET) {
+                CLOSE_TRY;
                 THROW(EXCEPTION_IO_RESET);
             }
             CATCH_OTHER(e) {
@@ -117,6 +118,5 @@ void app_main(void) {
         END_TRY;
     }
 
-    // return_to_dashboard:
     return;
 }

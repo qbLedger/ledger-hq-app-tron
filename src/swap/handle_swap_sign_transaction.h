@@ -22,6 +22,5 @@
 
 bool swap_check_validity(const char* amount,
                          const char* tokenName,
-                         const char* fromAdress,
                          const char* action,
                          const char* toAddress);

@@ -19,6 +19,8 @@
  ********************************************************************************/
 #include "io.h"
 
+#include "format.h"
+
 #include "helpers.h"
 #include "ui_review_menu.h"
 #include "app_errors.h"
@@ -52,7 +54,7 @@ int handleSignByHash(uint8_t p1, uint8_t p2, uint8_t *workBuffer, uint16_t dataL
     }
     memcpy(transactionContext.hash, workBuffer, HASH_SIZE);
     // Write fullHash
-    array_hexstr((char *) fullHash, transactionContext.hash, HASH_SIZE);
+    format_hex(transactionContext.hash, HASH_SIZE, fullHash, sizeof(fullHash));
 
     // Contract Type = Unknown Type
     setContractType(UNKNOWN_CONTRACT, fullContract, sizeof(fullContract));

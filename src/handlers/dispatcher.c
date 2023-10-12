@@ -42,7 +42,7 @@ int apdu_dispatcher(const command_t *cmd) {
 
     switch (cmd->ins) {
         case INS_GET_PUBLIC_KEY:
-            // Request Publick Key
+            // Request Public Key
             return handleGetPublicKey(cmd->p1, cmd->p2, cmd->data, cmd->lc);
 
         case INS_SIGN:
