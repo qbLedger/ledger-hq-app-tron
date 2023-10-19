@@ -1,6 +1,6 @@
 /*******************************************************************************
- *   TRON Ledger
- *   (c) 2018 Ledger
+ *   Tron Ledger Wallet
+ *   (c) 2023 Ledger
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -14,23 +14,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
+#pragma once
 
-#include "os.h"
-#include "cx.h"
+#include <stdbool.h>
 
-#ifndef BASE58_H
-#define BASE58_H
+#define MAX_SWAP_TOKEN_LENGTH 15
 
-unsigned int encode_base_x(const char *alphabet,
-                           const unsigned int alphabet_len,
-                           const void *in,
-                           const unsigned int in_length,
-                           char *out,
-                           const unsigned int out_length);
-
-unsigned int encode_base_58(const void *in,
-                            const unsigned int in_len,
-                            char *out,
-                            const unsigned int out_len);
-
-#endif
+bool swap_check_validity(const char* amount,
+                         const char* tokenName,
+                         const char* action,
+                         const char* toAddress);

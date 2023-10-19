@@ -47,10 +47,9 @@ enum {
 typedef struct {
     nbgl_layoutTagValue_t fields[MAX_TX_FIELDS];
     bool warnings[WARNING_TYPES_NUMBER];
+    ui_approval_state_t state;
     const char *flowTitle;
     const char *flowSubtitle;
-    nbgl_callback_t confirmCb;
-    nbgl_callback_t rejectCb;
 } nbgl_tx_infos_t;
 
 // Static variables
@@ -78,7 +77,7 @@ static void dataWarningChoice(bool accept) {
             displayTransaction();
         }
     } else {
-        txInfos.rejectCb();
+        ui_callback_tx_cancel(false);
         nbgl_useCaseStatus("Transaction rejected", false, ui_idle);
     }
 }
@@ -87,7 +86,7 @@ static void customContractWarningChoice(bool accept) {
     if (accept) {
         displayTransaction();
     } else {
-        txInfos.rejectCb();
+        ui_callback_tx_cancel(false);
         nbgl_useCaseStatus("Transaction rejected", false, ui_idle);
     }
 }
@@ -130,16 +129,29 @@ static void reviewStart() {
 }
 
 static void reviewChoice(bool confirm) {
+    bool ret;
+
     if (confirm) {
-        txInfos.confirmCb();
-        nbgl_useCaseStatus("TRANSACTION\nSIGNED", true, ui_idle);
+        if (txInfos.state == APPROVAL_SIGN_PERSONAL_MESSAGE) {
+            ret = ui_callback_signMessage_ok(false);
+        } else if (txInfos.state == APPROVAL_SHARED_ECDH_SECRET) {
+            ret = ui_callback_ecdh_ok(false);
+        } else {
+            ret = ui_callback_tx_ok(false);
+        }
+
+        if (ret) {
+            nbgl_useCaseStatus("TRANSACTION\nSIGNED", true, ui_idle);
+        } else {
+            nbgl_useCaseStatus("Transaction failure", false, ui_idle);
+        }
     } else {
         rejectChoice();
     }
 }
 
 static void rejectConfirmation(void) {
-    txInfos.rejectCb();
+    ui_callback_tx_cancel(false);
     nbgl_useCaseStatus("Transaction rejected", false, ui_idle);
 }
 
@@ -157,8 +169,7 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
 
     txInfos.warnings[DATA_WARNING] = data_warning;
     txInfos.flowTitle = "Review transaction";
-    txInfos.rejectCb = (nbgl_callback_t) ui_callback_tx_cancel;
-    txInfos.confirmCb = (nbgl_callback_t) ui_callback_tx_ok;
+    txInfos.state = state;
 
     infoLongPress.text = "Sign transaction";
     infoLongPress.longPressText = "Hold to sign";
@@ -287,7 +298,6 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
             infoLongPress.text = "Sign transaction to\nClaim Rewards";
             break;
         case APPROVAL_SIGN_PERSONAL_MESSAGE:
-            txInfos.confirmCb = (nbgl_callback_t) ui_callback_signMessage_ok;
             txInfos.fields[0].item = "Message hash";
             txInfos.fields[0].value = fullContract;
             txInfos.fields[1].item = "Sign with";
@@ -312,7 +322,6 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
             txInfos.flowSubtitle = "Custom Contract";
             break;
         case APPROVAL_SHARED_ECDH_SECRET:
-            txInfos.confirmCb = (nbgl_callback_t) ui_callback_ecdh_ok;
             txInfos.fields[0].item = "ECDH Address";
             txInfos.fields[0].value = fromAddress;
             txInfos.fields[1].item = "Shared With";
@@ -389,13 +398,13 @@ static void prepareTxInfos(ui_approval_state_t state, bool data_warning) {
 }
 
 static void address_verification_cancelled(void) {
-    ui_callback_tx_cancel();
+    ui_callback_tx_cancel(false);
     nbgl_useCaseStatus("Address verification\ncancelled", false, ui_idle);
 }
 
 static void display_address_callback(bool confirm) {
     if (confirm) {
-        ui_callback_address_ok();
+        ui_callback_address_ok(false);
         nbgl_useCaseStatus("ADDRESS\nVERIFIED", true, ui_idle);
     } else {
         address_verification_cancelled();
