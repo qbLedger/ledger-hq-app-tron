@@ -47,8 +47,11 @@ class Test_GET_PUBLIC_KEY():
                     ROOT_SCREENSHOT_PATH, test_name)
             else:
                 instructions = [
-                    NavInsID.USE_CASE_REVIEW_TAP,
-                    NavIns(NavInsID.TOUCH, (200, 335)),
+                    NavInsID.SWIPE_CENTER_TO_LEFT,
+                    NavIns(
+                        NavInsID.TOUCH,
+                        (100 if firmware.device.startswith("flex") else 200,
+                         400 if firmware.device.startswith("flex") else 335)),
                     NavInsID.USE_CASE_ADDRESS_CONFIRMATION_EXIT_QR,
                     NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CONFIRM,
                     NavInsID.USE_CASE_STATUS_DISMISS
@@ -99,7 +102,7 @@ class Test_GET_PUBLIC_KEY():
                         NavInsID.USE_CASE_STATUS_DISMISS
                     ],
                     [
-                        NavInsID.USE_CASE_REVIEW_TAP,
+                        NavInsID.SWIPE_CENTER_TO_LEFT,
                         NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CANCEL,
                         NavInsID.USE_CASE_STATUS_DISMISS
                     ]

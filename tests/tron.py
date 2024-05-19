@@ -197,20 +197,37 @@ class TronClient:
             return newpos
         return size + newpos
 
-    def navigate(self, snappath: Path = None, text: str = ""):
-        if self._firmware.device == "stax":
-            self._navigator.navigate_until_text_and_compare(
+    def navigate(self,
+                 snappath: Path = None,
+                 text: str = "",
+                 warning_approve: bool = False):
+        if not self._firmware.device.startswith("nano"):
+            path_name = ""
+            screen_change_before_first_instruction = True
+            if warning_approve:
                 # Use custom touch coordinates to account for warning approve
                 # button position.
-                NavIns(NavInsID.TOUCH, (200, 545)),
-                [
+                instructions = [
+                    NavIns(
+                        NavInsID.TOUCH,
+                        (200, 445 if self._firmware.device.startswith("flex")
+                         else 545)),
+                ]
+                self._navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH,
+                                                     str(snappath) + "/part1",
+                                                     instructions)
+                path_name = "/part2"
+                screen_change_before_first_instruction = False
+            self._navigator.navigate_until_text_and_compare(
+                NavInsID.SWIPE_CENTER_TO_LEFT, [
                     NavInsID.USE_CASE_REVIEW_CONFIRM,
                     NavInsID.USE_CASE_STATUS_DISMISS
                 ],
                 text,
                 ROOT_SCREENSHOT_PATH,
-                snappath,
-                screen_change_before_first_instruction=True)
+                str(snappath) + path_name,
+                screen_change_before_first_instruction=
+                screen_change_before_first_instruction)
         else:
             self._navigator.navigate_until_text_and_compare(
                 NavIns(NavInsID.RIGHT_CLICK), [NavIns(NavInsID.BOTH_CLICK)],
@@ -290,7 +307,8 @@ class TronClient:
              signatures=[],
              snappath: Path = None,
              text: str = "",
-             navigate: bool = True):
+             navigate: bool = True,
+             warning_approve: bool = False):
         messages = []
 
         # Split transaction in multiples APDU
@@ -339,7 +357,7 @@ class TronClient:
         if navigate:
             with self._client.exchange_async(CLA, InsType.SIGN, p1, 0x00,
                                              messages[-1]):
-                self.navigate(snappath, text)
+                self.navigate(snappath, text, warning_approve)
             return self._client.last_async_response
         else:
             return self._client.exchange(CLA, InsType.SIGN, p1, 0x00,
