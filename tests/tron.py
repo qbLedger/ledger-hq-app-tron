@@ -201,7 +201,14 @@ class TronClient:
                  snappath: Path = None,
                  text: str = "",
                  warning_approve: bool = False):
-        if not self._firmware.device.startswith("nano"):
+        if self._firmware.is_nano:
+            self._navigator.navigate_until_text_and_compare(
+                NavIns(NavInsID.RIGHT_CLICK), [NavIns(NavInsID.BOTH_CLICK)],
+                text,
+                ROOT_SCREENSHOT_PATH,
+                snappath,
+                screen_change_before_first_instruction=True)
+        else:
             path_name = ""
             screen_change_before_first_instruction = True
             if warning_approve:
@@ -228,13 +235,6 @@ class TronClient:
                 str(snappath) + path_name,
                 screen_change_before_first_instruction=
                 screen_change_before_first_instruction)
-        else:
-            self._navigator.navigate_until_text_and_compare(
-                NavIns(NavInsID.RIGHT_CLICK), [NavIns(NavInsID.BOTH_CLICK)],
-                text,
-                ROOT_SCREENSHOT_PATH,
-                snappath,
-                screen_change_before_first_instruction=True)
 
     def getVersion(self):
         return self._client.exchange(CLA, InsType.GET_APP_CONFIGURATION, 0x00,

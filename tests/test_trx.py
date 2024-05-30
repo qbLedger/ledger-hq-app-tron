@@ -36,7 +36,7 @@ class TestTRX():
                           warning_approve=False):
         path = Path(currentframe().f_back.f_code.co_name)
         text = None
-        if firmware.device.startswith("nano"):
+        if firmware.is_nano:
             if text_index == 0:
                 text = "Sign"
             elif text_index == 1:
@@ -101,7 +101,7 @@ class TestTRX():
                 to_address=bytes.fromhex(
                     client.address_hex("TBoTZcARzWVgnNuB9SyE3S5g1RwsXoQL16")),
                 amount=100000000))
-        if firmware.device.startswith("nano"):
+        if firmware.is_nano:
             text = "Sign"
         else:
             text = "Hold to sign"
@@ -470,10 +470,10 @@ class TestTRX():
 
         with backend.exchange_async(CLA, InsType.SIGN_PERSONAL_MESSAGE, 0x00,
                                     0x00, data):
-            if not firmware.device.startswith("nano"):
-                text = "Hold to sign"
-            else:
+            if firmware.is_nano:
                 text = "message"
+            else:
+                text = "Hold to sign"
             client.navigate(Path(currentframe().f_code.co_name), text)
 
         resp = backend.last_async_response
@@ -495,10 +495,10 @@ class TestTRX():
 
         with backend.exchange_async(CLA, InsType.SIGN_TXN_HASH, 0x00, 0x00,
                                     data):
-            if not firmware.device.startswith("nano"):
-                text = "Hold to sign"
-            else:
+            if firmware.is_nano:
                 text = "Sign"
+            else:
+                text = "Hold to sign"
             client.navigate(Path(currentframe().f_code.co_name), text)
 
         resp = backend.last_async_response
@@ -531,10 +531,10 @@ class TestTRX():
         data += bytearray.fromhex(f"04{client.getAccount(1)['publicKey'][2:]}")
         with backend.exchange_async(CLA, InsType.GET_ECDH_SECRET, 0x00, 0x01,
                                     data):
-            if not firmware.device.startswith("nano"):
-                text = "Hold to sign"
-            else:
+            if firmware.is_nano:
                 text = "Accept"
+            else:
+                text = "Hold to sign"
             client.navigate(Path(currentframe().f_code.co_name), text)
         resp = backend.last_async_response
 
