@@ -520,10 +520,10 @@ class TestTRX():
 
         with backend.exchange_async(CLA, InsType.SIGN_TIP_712_MESSAGE, 0x00,
                                     0x00, data):
-            if firmware.device == "stax":
-                text = "Hold to sign"
-            else:
+            if firmware.is_nano:
                 text = "message"
+            else:
+                text = "Hold to sign"
             client.navigate(Path(currentframe().f_code.co_name), text)
 
         resp = backend.last_async_response
